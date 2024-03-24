@@ -2,8 +2,10 @@
 
 ## Libraries used:
 jsoup - https://jsoup.org/
+
 crawler4j - https://github.com/yasserg/crawler4j
 
+Install Maven using this guide (https://phoenixnap.com/kb/install-maven-windows) and run "mvn install" to install the libraries.  
 
 ## Getting started
 
