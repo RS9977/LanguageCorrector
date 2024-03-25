@@ -24,6 +24,7 @@ public class Main {
         graph.addNode(State.PRONOUN);
         graph.addNode(State.VERB);
         graph.addNode(State.ADJECTIVE);
+        graph.addNode(State.ADVERB);
         graph.addNode(State.ARTICLE);
         graph.addNode(State.NOUN);
         graph.addNode(State.DOT);
@@ -32,7 +33,10 @@ public class Main {
         graph.addEdge(State.START,     State.PRONOUN);
         graph.addEdge(State.PRONOUN,   State.VERB);
         graph.addEdge(State.VERB,      State.ADJECTIVE);
+        graph.addEdge(State.VERB,      State.ADVERB);
+        graph.addEdge(State.ADVERB,    State.ADJECTIVE);
         graph.addEdge(State.VERB,      State.ARTICLE);
+        graph.addEdge(State.ARTICLE,   State.ADVERB);
         graph.addEdge(State.ARTICLE,   State.ADJECTIVE);
         graph.addEdge(State.ADJECTIVE, State.DOT);
         graph.addEdge(State.ADJECTIVE, State.NOUN);
@@ -41,7 +45,7 @@ public class Main {
 
         
         // Sentence to tokenize
-        String sentence = "they are a good.";
+        String sentence = "it is a very good book.";
         // Tokenize the sentence
         DBinterface dbInterface = new DBinterface();
 
@@ -49,3 +53,6 @@ public class Main {
         
     }
 }
+
+//javac -d bin Main.java **/*.java
+//java -cp bin:SQLite/sqlite-jdbc-3.45.2.0.jar:SQLite/slf4j-api-1.7.36.jar Main

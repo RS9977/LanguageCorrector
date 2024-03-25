@@ -7,6 +7,7 @@ public enum  State {
         VERB,       // State for processing a verb token
         ADJECTIVE,   // State for processing an adjective token
         NOUN,   // State for processing a noun
+        ADVERB,
         DOT,
         END,
         NAN;   // State for processing a noun
