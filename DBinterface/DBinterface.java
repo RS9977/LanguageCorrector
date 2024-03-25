@@ -7,6 +7,7 @@ import DirectedGraph.DirectedGraph;
 
 import java.sql.*;
 import StateMachine.*;
+import TypoCorrector.TypoCorrector;
 
 public class DBinterface {
     public void checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
@@ -14,6 +15,9 @@ public class DBinterface {
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
         String url = "jdbc:sqlite:./SQLite/mydatabase.db";
+        String dicFileName = "./SQLite/smallDic.txt";
+        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        int initialConf = 0;
         try (Connection connection = DriverManager.getConnection(url)) {
 
             // Lookup each token in the database and categorize it
@@ -21,14 +25,35 @@ public class DBinterface {
                 String token = tokens[i];
                 
                 try (Statement statement = connection.createStatement()) {
+                    
                     String query = "SELECT role FROM word_roles WHERE word = '" + token + "';";
+                    String role = new String();
+                    
                     ResultSet resultSet = statement.executeQuery(query);
                     if (resultSet.next()) {
-                        String role = resultSet.getString("role");
-                        // Replace the token with its role
+                        role = resultSet.getString("role");
+                        System.out.print("first try: " + token + " -> " + role);
                         tokens[i] = role;
+                    }else{
+                        String tokenCorrected = new String();
+                        if(role.isEmpty()){
+                            tokenCorrected = typoChecker.closestWord(token);
+                            if(!tokenCorrected.equals(token))
+                                initialConf += 5;
+                            System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+                            query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                            // Replace the token with its role
+                            resultSet = statement.executeQuery(query);
+                            if (resultSet.next()) {
+                                role = resultSet.getString("role");
+                                System.out.print("| Second try: "+ token + " -> " + role);
+                                tokens[i] = role;
+                            }
+                        }
+
+                    } 
                     }
-                }
+                    System.out.println();
             }
 
             List<State> actions = new ArrayList<>();
@@ -41,7 +66,7 @@ public class DBinterface {
 
             // Check if the sequence of actions follows the state machine
 
-            int confidence = SM.isStateMachineFollowed(graph, actions, initialState);
+            int confidence = SM.isStateMachineFollowed(graph, actions, initialState, initialConf);
             System.out.print("The confidence score is: "+ confidence + "\n");
         } catch (SQLException e) {
             e.printStackTrace();

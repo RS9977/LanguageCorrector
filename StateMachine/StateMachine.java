@@ -4,8 +4,8 @@ import java.util.List;
 
 import DirectedGraph.DirectedGraph;
 public class StateMachine{
-    public int isStateMachineFollowed(DirectedGraph<State> graph, List<State> actions, State initialState) {
-        int confidence = 0;
+    public int isStateMachineFollowed(DirectedGraph<State> graph, List<State> actions, State initialState, int initialConf) {
+        int confidence = initialConf;
         State currentState = initialState;
         for (State action : actions) {
             List<State> transitions = graph.getAdjacentNodes(currentState);
