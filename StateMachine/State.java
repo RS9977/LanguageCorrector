@@ -9,7 +9,9 @@ public enum  State {
         NOUN,   // State for processing a noun
         ADVERB,
         DOT,
+        CONJ,
         END,
+        COMMA,
         NAN;   // State for processing a noun
 
         @Override

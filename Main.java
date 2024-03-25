@@ -1,15 +1,3 @@
-import java.lang.reflect.Array;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-
-
-
 import DirectedGraph.DirectedGraph;
 import StateMachine.*;
 import DBinterface.DBinterface;
@@ -26,6 +14,8 @@ public class Main {
         graph.addNode(State.ADJECTIVE);
         graph.addNode(State.ADVERB);
         graph.addNode(State.ARTICLE);
+        graph.addNode(State.CONJ);
+        graph.addNode(State.COMMA);
         graph.addNode(State.NOUN);
         graph.addNode(State.DOT);
         
@@ -41,11 +31,16 @@ public class Main {
         graph.addEdge(State.ADJECTIVE, State.DOT);
         graph.addEdge(State.ADJECTIVE, State.NOUN);
         graph.addEdge(State.NOUN,      State.DOT);
+        graph.addEdge(State.NOUN,      State.COMMA);
         graph.addEdge(State.DOT,       State.END);
+        graph.addEdge(State.COMMA,     State.PRONOUN);
+        graph.addEdge(State.COMMA,     State.CONJ);
+        graph.addEdge(State.CONJ,      State.PRONOUN);
+        
 
         
         // Sentence to tokenize
-        String sentence = "it is a very good book.";
+        String sentence = "it is a very good book, and it is very small.";
         // Tokenize the sentence
         DBinterface dbInterface = new DBinterface();
 
