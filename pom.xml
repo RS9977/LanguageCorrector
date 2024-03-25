@@ -26,6 +26,7 @@
       <artifactId>jsoup</artifactId>
       <version>1.17.2</version>
     </dependency>
+
     <dependency>
       <groupId>edu.uci.ics</groupId>
       <artifactId>crawler4j</artifactId>
@@ -42,7 +43,28 @@
         <artifactId>je</artifactId>
         <version>18.3.12</version> <!-- Hope this newer version is compatible with crawler4j -->
     </dependency>
+  </dependencies>
 
-  <!-- other dependencies -->
-</dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <configuration>
+          <mainClass>main</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
 </project>
