@@ -39,7 +39,7 @@ public class Main {
 
         
         // Sentence to tokenize
-        String sentence = "it a very good book it good";
+        String sentence = "it very good book, but it is small book.";
         // Tokenize the sentence
         DBinterface dbInterface = new DBinterface();
 
