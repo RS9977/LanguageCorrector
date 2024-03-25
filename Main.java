@@ -6,19 +6,18 @@ public class Main {
      public static void main(String[] args) {
         DirectedGraph<State> graph = new DirectedGraph<>();
         
-
-        // Build the state machine graph
-        graph.addNode(State.START);
-        graph.addNode(State.PRONOUN);
-        graph.addNode(State.VERB);
-        graph.addNode(State.ADJECTIVE);
-        graph.addNode(State.ADVERB);
-        graph.addNode(State.ARTICLE);
-        graph.addNode(State.CONJ);
-        graph.addNode(State.COMMA);
-        graph.addNode(State.NOUN);
-        graph.addNode(State.DOT);
         
+        State cur = State.first();
+        for(int i=0; i<State.values().length; i++){
+            graph.addNode(cur);
+            cur = cur.next();
+        }
+
+        cur = State.first();
+        for(int i=1; i<State.values().length; i++){
+            cur = cur.next();
+            graph.addEdge(State.first(), cur);
+        }
 
         graph.addEdge(State.START,     State.PRONOUN);
         graph.addEdge(State.PRONOUN,   State.VERB);
@@ -40,7 +39,7 @@ public class Main {
 
         
         // Sentence to tokenize
-        String sentence = "it is a very good book, and it is very small.";
+        String sentence = "it a very good book it good";
         // Tokenize the sentence
         DBinterface dbInterface = new DBinterface();
 
@@ -50,4 +49,4 @@ public class Main {
 }
 
 //javac -d bin Main.java **/*.java
-//java -cp bin:SQLite/sqlite-jdbc-3.45.2.0.jar:SQLite/slf4j-api-1.7.36.jar Main
+//java -cp bin:SQLite/sqlite-jdbc-3.45.2.0.jar:SQLite/slf4j-api-1.7.36.jar:SQLite/slf4j-jdk14-1.7.36.jar Main 

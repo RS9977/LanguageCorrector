@@ -10,7 +10,7 @@ import StateMachine.*;
 
 public class DBinterface {
     public void checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
-        StateMachine<State> SM = new StateMachine<>();
+        StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
         String url = "jdbc:sqlite:./SQLite/mydatabase.db";
@@ -41,12 +41,8 @@ public class DBinterface {
 
             // Check if the sequence of actions follows the state machine
 
-            boolean isFollowed = SM.isStateMachineFollowed(graph, actions, initialState);
-            if (isFollowed) {
-                System.out.println("Sequence of actions follows the state machine.");
-            } else {
-                System.out.println("Sequence of actions does not follow the state machine.");
-            }
+            int confidence = SM.isStateMachineFollowed(graph, actions, initialState);
+            System.out.print("The confidence score is: "+ confidence + "\n");
         } catch (SQLException e) {
             e.printStackTrace();
         }

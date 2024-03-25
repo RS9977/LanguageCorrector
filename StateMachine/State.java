@@ -27,4 +27,14 @@ public enum  State {
             }
             return NAN;
         }
+
+        public State next() {
+            State[] colors = State.values();
+            return colors[(this.ordinal()+1)%colors.length];
+          }
+        
+
+        static public State first() {
+            return State.values()[0];
+        }
 }
