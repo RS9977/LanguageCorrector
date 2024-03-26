@@ -6,7 +6,7 @@ import StateMachine.*;
 import DBinterface.DBinterface;
 import util.*;
 
-public class Main {
+public class Checker {
      public static void main(String[] args) {
         //DirectedGraph<State> graph = new DirectedGraph<>();
         
@@ -29,6 +29,6 @@ public class Main {
     }
 }
 
-//javac -d bin Main.java **/*.java
-//java -cp bin:SQLite/sqlite-jdbc-3.45.2.0.jar:SQLite/slf4j-api-1.7.36.jar:SQLite/slf4j-jdk14-1.7.36.jar Main 
+//javac -d bin Checker.java **/*.java
+//java -cp bin:SQLite/sqlite-jdbc-3.45.2.0.jar:SQLite/slf4j-api-1.7.36.jar:SQLite/slf4j-jdk14-1.7.36.jar Checker 
 //jar cvfm checker.jar manifest.txt -C bin . -C SQLite .
