@@ -10,7 +10,7 @@ import StateMachine.*;
 import TypoCorrector.TypoCorrector;
 
 public class DBinterface {
-    public void checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
+    public int checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
@@ -68,8 +68,10 @@ public class DBinterface {
 
             int confidence = SM.isStateMachineFollowed(graph, actions, initialState, initialConf);
             System.out.print("The confidence score is: "+ confidence + "\n");
+            return confidence;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return 0;
     }
 }
