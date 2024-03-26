@@ -30,6 +30,7 @@ public class BasicGraph {
         graph.addEdge(State.ARTICLE,   State.ADJECTIVE);
         graph.addEdge(State.ADJECTIVE, State.DOT);
         graph.addEdge(State.ADJECTIVE, State.NOUN);
+        graph.addEdge(State.ADJECTIVE, State.COMMA);
         graph.addEdge(State.NOUN,      State.DOT);
         graph.addEdge(State.NOUN,      State.COMMA);
         graph.addEdge(State.DOT,       State.END);

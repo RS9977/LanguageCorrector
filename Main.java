@@ -4,29 +4,27 @@ import DirectedGraph.BasicGraph;
 import DirectedGraph.DirectedGraph;
 import StateMachine.*;
 import DBinterface.DBinterface;
+import util.*;
 
 public class Main {
      public static void main(String[] args) {
         //DirectedGraph<State> graph = new DirectedGraph<>();
         
         String sentence;
-        if(args.length > 0){
-            sentence = args[0];
-        }else{
-            sentence = "it a very good book, but it is small book.";
-            System.out.println("Please enter a sentence. Program used the default sentence:\n" + sentence + "\n--------------------------------------------");
-        }
+        ArgumentParser argPars = ArgumentParser.of(args);;
         
-        BasicGraph basicGraphClass = new BasicGraph();
-        DirectedGraph<State> graph = basicGraphClass.getGraph();
+        if(argPars.isCheckSentence()){
+            BasicGraph basicGraphClass = new BasicGraph();
+            DirectedGraph<State> graph = basicGraphClass.getGraph();
 
         
         // Sentence to tokenize
         //String sentence = "it is a very good book, but it is small book.";
         // Tokenize the sentence
-        DBinterface dbInterface = new DBinterface();
+            DBinterface dbInterface = new DBinterface();
 
-        dbInterface.checkTokenInDatabase(sentence, graph);
+            dbInterface.checkTokenInDatabase(argPars.getSentence(), graph);
+        }
           
     }
 }
