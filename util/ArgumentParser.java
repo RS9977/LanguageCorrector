@@ -6,12 +6,15 @@ import java.util.Arrays;
 public class ArgumentParser {
 
     private String sentence;
+    private String fileName;
     private boolean updateToken;
     private boolean checkSentence;
+    private boolean checkFile;
 
     ArgumentParser(String[] args) {
         checkSentence = false;
         updateToken = false;
+        checkFile  = false;
         parseArguments(Arrays.asList(args));
     }
 
@@ -26,6 +29,15 @@ public class ArgumentParser {
                 switch (arg) {
                     case "--help":
                         printHelp();
+                        break;
+                    case "--file":
+                        if (i + 1 < args.size()) {
+                            fileName = args.get(i + 1);
+                            checkFile = true;
+                            i++; // Increment to skip the next argument
+                        } else {
+                            System.err.println("Error: Missing argument after --file");
+                        }
                         break;
                     case "--sentence":
                         if (i + 1 < args.size()) {
@@ -63,10 +75,17 @@ public class ArgumentParser {
         return sentence;
     }
 
+    public String getFileName(){
+        return fileName;
+    }
+
     public boolean isUpdateToken() {
         return updateToken;
     }
     public boolean isCheckSentence(){
         return checkSentence;
+    }
+    public boolean isCheckFile(){
+        return checkFile;
     }
 }

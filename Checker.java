@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.List;
 
 import DirectedGraph.BasicGraph;
 import DirectedGraph.DirectedGraph;
@@ -10,18 +11,20 @@ public class Checker {
      public static void main(String[] args) {
         //DirectedGraph<State> graph = new DirectedGraph<>();
         
-        String sentence;
-        ArgumentParser argPars = ArgumentParser.of(args);;
-        
-        if(argPars.isCheckSentence()){
-            BasicGraph basicGraphClass = new BasicGraph();
-            DirectedGraph<State> graph = basicGraphClass.getGraph();
+        ArgumentParser argPars = ArgumentParser.of(args);
+        BasicGraph basicGraphClass = new BasicGraph();
+        DBinterface dbInterface = new DBinterface();
+        DirectedGraph<State> graph = basicGraphClass.getGraph();
 
-        
-        // Sentence to tokenize
-        //String sentence = "it is a very good book, but it is small book.";
-        // Tokenize the sentence
-            DBinterface dbInterface = new DBinterface();
+        if(argPars.isCheckFile()){
+            SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
+            List<String> extractedSentences = extractor.getSentences();  
+            for (String sentence : extractedSentences) {
+                dbInterface.checkTokenInDatabase(sentence, graph);
+                System.out.println("##########################################################");
+            }
+        }else if(argPars.isCheckSentence()){
+
 
             dbInterface.checkTokenInDatabase(argPars.getSentence(), graph);
         }
