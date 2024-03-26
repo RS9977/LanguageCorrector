@@ -55,16 +55,4 @@ public class JsonMaker {
     public static JsonMaker create() {
         return new JsonMaker();
     }
-
-    public static void main(String[] args) {
-        JsonMaker jsonMaker = JsonMaker.create();
-        jsonMaker.addSentence("This is strange so choice", 55);
-        jsonMaker.addPhrase("strange so choice", 70);
-        jsonMaker.addPhrase("so choice word", 80);
-        jsonMaker.addPhrase("This is", 0);
-        jsonMaker.addPhrase("This is strange", 0);
-        jsonMaker.addPhrase("strange so", 10);
-
-        jsonMaker.toJson("data.json");
-    }
 }
