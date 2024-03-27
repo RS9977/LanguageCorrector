@@ -26,18 +26,18 @@ public class main {
         CrawlController controller = null; // Declare controller before the try block to make it accessible outside the try block
         try {
             controller = new CrawlController(config, pageFetcher, robotstxtServer); // Initialize controller inside the try block
+                
+            // Add seed URLs
+            controller.addSeed("https://www.en.wikipedia.com/"); // Add the seed URL to the controller
+
+            int numberOfCrawlers = 1; // Set the number of crawlers
+
+            // Start the crawler
+            CrawlController.WebCrawlerFactory<OurCrawler> factory = () -> new OurCrawler(); // Create a new WebCrawlerFactory object
+            controller.start(factory, numberOfCrawlers); // Start the controller with the factory and number of crawlers
         } catch (Exception e) {
-            System.out.println("Error initializing controller");
+            System.out.println("ERROR INITIALIZING CONTROLLER!!!!!");
             e.printStackTrace();
         }
-
-        // Add seed URLs
-        controller.addSeed("https://www.en.wikipedia.com/"); // Add the seed URL to the controller
-
-        int numberOfCrawlers = 7; // Set the number of crawlers to 7
-
-        // Start the crawler
-        CrawlController.WebCrawlerFactory<OurCrawler> factory = () -> new OurCrawler(); // Create a new WebCrawlerFactory object
-        controller.start(factory, numberOfCrawlers); // Start the controller with the factory and number of crawlers
     }
 }
