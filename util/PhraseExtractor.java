@@ -18,7 +18,7 @@ public class PhraseExtractor {
         List<String> phrases = new ArrayList<>();
         String[] words = sentence.split("\\s+");
         for (int i = 0; i < words.length; i++) {
-            for (int j = i + 1; j <= 4; j++){//words.length; j++) {
+            for (int j = i + 2; (j <= 4 & j<=words.length); j++){//words.length; j++) {
                 StringBuilder phraseBuilder = new StringBuilder();
                 for (int k = i; k < j; k++) {
                     phraseBuilder.append(words[k]);
