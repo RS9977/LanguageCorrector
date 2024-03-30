@@ -1,13 +1,21 @@
 package StateMachine;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import DirectedGraph.DirectedGraph;
 
 import util.TwoListStruct;
+import util.ListToString;
+import util.StringFileWriter;
+import util.StringToList;
+import TypoCorrector.TypoCorrector;
 
 public class StateMachine{
+
     public int isStateMachineFollowed(DirectedGraph<State> graph, List<State> actions, State initialState, int initialConf) {
         int confidence = initialConf;
         //System.out.println("----------------------------------------------------");
@@ -26,6 +34,47 @@ public class StateMachine{
         }
         return confidence;
     }
+    public TwoListStruct suggestedStateMachine(DirectedGraph<State> graph, List<State> actions, State initialState) {
+        //System.out.println("----------------------------------------------------");
+        State currentState = initialState;
+        boolean flag = false;
+        List<State> suggestedAction = new ArrayList<>();
+        List<Integer> flags         = new ArrayList<>();
+        State tempState = currentState;
+        //suggestedAction.add(currentState);
+        int cnt = 0;
+
+        StateMachine SM = new StateMachine();
+        int confidence = SM.isStateMachineFollowed(graph, actions, initialState, 0);
+        if(confidence<10)
+            return TwoListStruct.of(actions, flags);
+        else{
+            Set<String> allPaths = new HashSet<>();
+            DirectedGraph.dfs(graph, initialState, 0, actions.size()+4, new ArrayList<>(), allPaths);
+            StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
+            for(String path: allPaths)
+                sfw.appendString(path);
+            try {
+                sfw.writeToFile();
+                TypoCorrector tc = TypoCorrector.of("all_path.txt", true);
+                ListToString lts = ListToString.of();
+                for(State action: actions)
+                    lts.addString(action);
+                String suggestedActionsString = tc.closestWord(lts.getString());
+                List<State> parts = StringToList.split(suggestedActionsString);
+                suggestedAction.addAll(parts);
+                flags.addAll(tc.traceBack());
+                return TwoListStruct.of(suggestedAction, flags);
+            } catch (IOException e) {
+                System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            }
+
+        }
+        return TwoListStruct.of(suggestedAction, flags);
+    }
+
+
+    /*
     public TwoListStruct suggestedStateMachine(DirectedGraph<State> graph, List<State> actions, State initialState) {
         
         //System.out.println("----------------------------------------------------");
@@ -82,6 +131,7 @@ public class StateMachine{
                             System.out.print("| updated to with missing: "+ checkState + " =)");
                             flags.add(2);
                             currentState = checkState;
+                            tempState = currentState;
                             i--;
                         }
                     }
@@ -98,4 +148,5 @@ public class StateMachine{
         
         return TwoListStruct.of(suggestedAction, flags);
     }
+     */
 }

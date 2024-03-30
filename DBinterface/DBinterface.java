@@ -140,16 +140,18 @@ public class DBinterface {
             TwoListStruct<State, Integer> output = SM.suggestedStateMachine(graph, actions, initialState);
             List<State> suggested = output.getOutputList();
             List<Integer> flags   = output.getChangesList();
+            int insertCnt = 0;
             for(int i=0; i<suggested.size(); i++){
                 if(flags.get(i)==1){
                     try (Statement statement = connection.createStatement()) {
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
                         String word = new String();
                         ResultSet resultSet = statement.executeQuery(query);
-                        System.out.print("!!! 1: ");
+                        
+                        System.out.print("!!! 1: " + resultSet + "| ");
                         if (resultSet.next()) {
                             word = resultSet.getString("word");
-                            System.out.println(word);
+                            System.out.println("Here I am: "+ word);
                             if(i<tokenList.size())
                                 tokenList.set(i,word);
                             else
@@ -158,15 +160,16 @@ public class DBinterface {
                     }
                 }else if(flags.get(i)==2){
                     try (Statement statement = connection.createStatement()) {
+                        System.out.println(suggested.get(i));
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
                         String word = new String();
                         ResultSet resultSet = statement.executeQuery(query);
-                        System.out.print("!!! 2: ");
                         if (resultSet.next()) {
+                            insertCnt++;
                             word = resultSet.getString("word");
-                            System.out.println(word);
+                            System.out.println("Here I am: "+ word);
                             if(i<tokenList.size())
-                                tokenList.add(i,word);
+                                tokenList.add(i-insertCnt,word);
                             else
                                 tokenList.add(word);
                         }

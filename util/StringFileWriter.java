@@ -7,10 +7,21 @@ import java.io.IOException;
 public class StringFileWriter {
     private StringBuilder stringBuilder;
     private String filePath;
+    private String space;
 
     private StringFileWriter(String filePath) {
         this.stringBuilder = new StringBuilder();
         this.filePath = filePath;
+        this.space = " ";
+    }
+    private StringFileWriter(String filePath, String S) {
+        this.stringBuilder = new StringBuilder();
+        this.filePath = filePath;
+        this.space = S;
+    }
+
+    public static StringFileWriter of(String filePath, String S) {
+        return new StringFileWriter(filePath, S);
     }
 
     public static StringFileWriter of(String filePath) {
@@ -19,7 +30,7 @@ public class StringFileWriter {
 
     public void appendString(String str) {
         stringBuilder.append(str);
-        stringBuilder.append(" ");
+        stringBuilder.append(space);
     }
 
     public void writeToFile() throws IOException {
