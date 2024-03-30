@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class RegexParser {
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         // Read URLs from a text file
         List<String> urls = readUrlsFromFile("urls.txt");
         List<String> links = new ArrayList<String>();
@@ -39,7 +39,7 @@ public class RegexParser {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     // Function to read URLs from a text file
     private static List<String> readUrlsFromFile(String filename) {
@@ -72,11 +72,16 @@ public class RegexParser {
     }
 
     // Function to extract links from the page
-    private static List<String> extractLinks(Document doc) {
+    public static List<String> extractLinks(String text) {
         List<String> links = new ArrayList<>();
-        Elements elements = doc.select("a[href]");
-        for (Element element : elements) {
-            links.add(element.attr("href"));
+        // Regular expression pattern to match URLs
+        String urlPattern = "(https?://\\S+|www\\.\\S+)";
+        Pattern pattern = Pattern.compile(urlPattern);
+        Matcher matcher = pattern.matcher(text);
+
+        // Find all matches of URLs in the text
+        while (matcher.find()) {
+            links.add(matcher.group());
         }
         return links;
     }

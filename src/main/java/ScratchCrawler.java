@@ -1,3 +1,4 @@
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -6,11 +7,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Iterator;
+import java.util.List;
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-
 public class ScratchCrawler {
     public static final int MAX_PAGES = 100; // Maximum pages to crawl
     public static long waitTime = 200; // Time to wait between requests in milliseconds
@@ -21,6 +23,7 @@ public class ScratchCrawler {
     // Also we do not care about the order of the pages.
     public Set<String> pagesVisited = new HashSet<String>(); // Set to store visited pages
     public Set<String> pagesToVisit = new HashSet<String>(); // Set to store pages to visit
+    public Set<String> disallowedDomains = new HashSet<String>(); // Set to store disallowed domains
 
     // In order to store the robots.txt restrictions, we are going to use a HashMap with the domain 
     // as the key and an object representing the restrictions as the value. This is the best data
@@ -49,14 +52,36 @@ public class ScratchCrawler {
         if(Debug.DEBUG)
             System.out.println("Getting page: " + url); // Print message
 
+        if (url.endsWith(")")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        
         try {
             URL pageURL = new URL(url); // Create a new URL object
+            String domain = extractDomain(url); // Extract the domain from the URL
 
+            HttpURLConnection connection = (HttpURLConnection) pageURL.openConnection();
+            // Set the User-Agent header
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                System.out.println("Error reading page. Response code: " + responseCode);
+
+                // If the page is not found, add the domain to the disallowedDomains set
+                disallowedDomains.add(domain);
+
+                if (Debug.DEBUG)
+                    System.out.println("Adding domain to disallowedDomains: " + domain); // Print message
+
+                return;
+            }
+            
             // Check if url is allowed by robots.txt
-            if (isInVisitedRobotsTxt(url)) { // If the URL is in the visited robots.txt
-                RobotsTXT robotsTXT = visitedRobotsTXTs.get(url); // Get the RobotsTXT object for the URL
-                if (robotsTXT.getDisallowedPaths().contains(url)) { // If the URL is disallowed
-                    System.out.println("URL is disallowed by robots.txt: " + url); // Print message
+            if (isInVisitedRobotsTxt(domain)) { // If the URL is in the visited robots.txt
+                RobotsTXT robotsTXT = visitedRobotsTXTs.get(domain); // Get the RobotsTXT object for the URL
+                if (robotsTXT.getDisallowedPaths().contains(url) || disallowedDomains.contains(domain)) { // If the URL is disallowed
+                    System.out.println("URL is disallowed"); // Print message
                     return; // Exit the method
                 } else {
                     // URL is allowed
@@ -77,11 +102,19 @@ public class ScratchCrawler {
             
             // Code to read the page
             BufferedReader reader = new BufferedReader(new InputStreamReader(pageURL.openStream())); // Create a new BufferReader object
-            PrintWriter writer = new PrintWriter("src/main/resources/crawledData.txt"); // Create a new PrintWriter object
+            PrintWriter writer = new PrintWriter(new FileWriter("src/main/resources/crawledData.txt",true)); // Create a new PrintWriter object
             String line; // Declare a string to store each line of the page
             
             while ((line = reader.readLine()) != null) { // While there are lines to read
                 writer.println(line); // Write the line to the file
+                
+                // Extract links from the page
+                List<String> links = RegexParser.extractLinks(line); // Extract the links from the line
+                for (String link : links) { // For each link
+                    if (!pagesVisited.contains(link)) { // If the link has not been visited
+                        pagesToVisit.add(link); // Add the link to pagesToVisit
+                    }
+                }
             }
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -136,20 +169,20 @@ public class ScratchCrawler {
                             // parse Disallow
                             robotsTXT.addDisallowedPath(line.substring(10)); // Add the disallowed path to the RobotsTXT object 
                             
-                            if (Debug.DEBUG)
+                            if (Debug.DEBUG_RobotsTXT)
                                 System.out.println(line); // Print message
                         } else if (line.startsWith("Allow: ")) {
                             // parse Allow
                             robotsTXT.addAllowedPath(line.substring(7)); // Add the allowed path to the RobotsTXT object
                             
-                            if (Debug.DEBUG)
+                            if (Debug.DEBUG_RobotsTXT)
                                 System.out.println(line); // Print message
                         } else if (line.startsWith("Crawl-delay: ")) {
                             // parse Crawl-delay
                             int delay = Integer.parseInt(line.substring(13)); // Parse the crawl delay
                             robotsTXT.setCrawlDelay(delay); // Set the crawl delay
 
-                            if (Debug.DEBUG)
+                            if (Debug.DEBUG_RobotsTXT)
                                 System.out.println(line); // Print message
                         }
                     }
@@ -252,7 +285,6 @@ public class ScratchCrawler {
             try {
                 Thread.sleep(waitTime); // Wait to be polite
                 getPage(nextPage); // Get the page
-                //extractURLS(nextPage); // Parse the page
             } catch (InterruptedException e) {
                 System.out.println("Error waiting between crawling pages.");
                 e.printStackTrace();
@@ -267,7 +299,7 @@ public class ScratchCrawler {
     public static void main(String[] args) {
         // Test the getNextPage method
         ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object
-        crawler.crawl("https://en.wikipedia.com/"); // Start off the crawl with the seed page
+        crawler.crawl("https://archive.org/details/bostonpubliclibrary"); // Start off the crawl with the seed page
 
         // String myURL = "https://wikipedia.org/"; // Set the URL to test
         // parseRobotsTXT(myURL); // Test the parseRobotsTXT method
