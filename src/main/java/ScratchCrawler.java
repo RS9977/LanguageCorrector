@@ -1,7 +1,10 @@
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Iterator;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +13,7 @@ import java.io.PrintWriter;
 
 public class ScratchCrawler {
     public static final int MAX_PAGES = 100; // Maximum pages to crawl
-    public static final long waitTime = 200; // Time to wait between requests in milliseconds
+    public static long waitTime = 200; // Time to wait between requests in milliseconds
 
     // Using a HashSet to store visited pages and pages to visit. This is the best data structure 
     // for this use case because it has O(1) time complexity for add, remove, and contains 
@@ -18,6 +21,12 @@ public class ScratchCrawler {
     // Also we do not care about the order of the pages.
     public Set<String> pagesVisited = new HashSet<String>(); // Set to store visited pages
     public Set<String> pagesToVisit = new HashSet<String>(); // Set to store pages to visit
+
+    // In order to store the robots.txt restrictions, we are going to use a HashMap with the domain 
+    // as the key and an object representing the restrictions as the value. This is the best data
+    // structure for this use case because it allows us to quickly look up the restrictions for a
+    // given domain.
+    public static HashMap<String, RobotsTXT> visitedRobotsTXTs = new HashMap<String, RobotsTXT>(); // Map to store robots.txt restrictions
 
     public String getNextPage() {
         String nextPage = null; // Initialize nextPage to null
@@ -42,6 +51,29 @@ public class ScratchCrawler {
 
         try {
             URL pageURL = new URL(url); // Create a new URL object
+
+            // Check if url is allowed by robots.txt
+            if (isInVisitedRobotsTxt(url)) { // If the URL is in the visited robots.txt
+                RobotsTXT robotsTXT = visitedRobotsTXTs.get(url); // Get the RobotsTXT object for the URL
+                if (robotsTXT.getDisallowedPaths().contains(url)) { // If the URL is disallowed
+                    System.out.println("URL is disallowed by robots.txt: " + url); // Print message
+                    return; // Exit the method
+                } else {
+                    // URL is allowed
+                    // Update the wait time based on the crawl delay
+                    waitTime = robotsTXT.getCrawlDelay() * 1000; // Update the wait time based on the crawl delay                       
+                }
+            } else {
+                parseRobotsTXT(url); // Parse the robots.txt file
+
+                // 
+            }
+
+            // Update the wait time based on the crawl delay
+            if (visitedRobotsTXTs.containsKey(url)) { // If the URL is in the visited robots.txt
+                RobotsTXT robotsTXT = visitedRobotsTXTs.get(url); // Get the RobotsTXT object for the URL
+                waitTime = robotsTXT.getCrawlDelay() * 1000; // Update the wait time based on the crawl delay
+            }
             
             // Code to read the page
             BufferedReader reader = new BufferedReader(new InputStreamReader(pageURL.openStream())); // Create a new BufferReader object
@@ -50,10 +82,6 @@ public class ScratchCrawler {
             
             while ((line = reader.readLine()) != null) { // While there are lines to read
                 writer.println(line); // Write the line to the file
-
-                // Code to extract links from the page
-                //line.extractURLs(); // Extract URLs from the line
-                // Should extract URLS from the line, add them to pagesToVisit, and print them to a file
             }
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -70,6 +98,152 @@ public class ScratchCrawler {
 
     }
 
+    public static void parseRobotsTXT(String url) {
+        // Code to parse robots.txt
+        if (Debug.DEBUG)
+            System.out.println("Parsing robots.txt for: " + url); // Print message
+
+        // Extract the domain from the URL
+        String domain = extractDomain(url);
+
+        // Create the RobotsTXT object
+        url = domain + "/robots.txt"; // Append /robots.txt to the domain
+
+        RobotsTXT robotsTXT = new RobotsTXT(url); // Create a new RobotsTXT object
+        if (Debug.DEBUG)
+            System.out.println("RobotsTXT object created for: " + url); // Print message
+
+        // Fetch the robots.txt file
+        try {
+            if (Debug.DEBUG)
+                System.out.println("Fetching robots.txt file for: " + url); // Print message
+
+            URL pageURL = new URL(url); // Create a new URL object
+            
+            // Code to read the page
+            BufferedReader reader = new BufferedReader(new InputStreamReader(pageURL.openStream())); // Create a new BufferReader object
+            //PrintWriter writer = new PrintWriter("src/main/resources/crawledData.txt"); // Create a new PrintWriter object
+            String line; // Declare a string to store each line of the page
+            while ((line = reader.readLine()) != null) { // While there are lines to read
+                //writer.println(line); // Write the line to the file
+                // if (Debug.DEBUG)
+                //     System.out.println(line); // Print the line
+                
+                if (line.startsWith("User-agent: *")) {
+                    // Read lines until next user agent
+                    while ((line = reader.readLine()) != null && !line.startsWith("User-agent:")) {
+                        if (line.startsWith("Disallow: ")) {
+                            // parse Disallow
+                            robotsTXT.addDisallowedPath(line.substring(10)); // Add the disallowed path to the RobotsTXT object 
+                            
+                            if (Debug.DEBUG)
+                                System.out.println(line); // Print message
+                        } else if (line.startsWith("Allow: ")) {
+                            // parse Allow
+                            robotsTXT.addAllowedPath(line.substring(7)); // Add the allowed path to the RobotsTXT object
+                            
+                            if (Debug.DEBUG)
+                                System.out.println(line); // Print message
+                        } else if (line.startsWith("Crawl-delay: ")) {
+                            // parse Crawl-delay
+                            int delay = Integer.parseInt(line.substring(13)); // Parse the crawl delay
+                            robotsTXT.setCrawlDelay(delay); // Set the crawl delay
+
+                            if (Debug.DEBUG)
+                                System.out.println(line); // Print message
+                        }
+                    }
+                }
+            }   
+
+            reader.close(); // Close the reader
+        } catch (MalformedURLException e) {
+            System.out.println("Error creating URL object for robots.txt file.");
+            e.printStackTrace();
+            return; // Exit the method
+        } catch (IOException e) {
+            System.out.println("Error fetching robots.txt file.");
+            e.printStackTrace();
+            return; // Exit the method
+        }
+
+        // Store the RobotsTXT object in the visitedRobotsTXTs map
+        visitedRobotsTXTs.put(domain, robotsTXT); // Add the RobotsTXT object to the map
+    }
+
+    public static boolean isInVisitedRobotsTxt(String url) {
+        // Code to check if URL is in visited robots.txt
+        if (Debug.DEBUG)
+            System.out.println("Checking if URL is in visited robots.txt: " + url); // Print message
+
+        // Extract the domain from the URL
+        String domain = url; // Set the domain to the URL for now
+        Pattern pattern = Pattern.compile("((http://|https://)?[^:/]+)"); // Create a pattern to match the domain
+        Matcher matcher = pattern.matcher(url); // Create a matcher for the pattern
+        if (matcher.find()) {
+            domain = matcher.group(1); // Obtain the domain and TLD, including the protocol
+            if (Debug.DEBUG)
+                System.out.println("Domain: " + domain); // Print the domain
+        } else {
+            System.out.println("Error extracting domain from URL.");
+            return false; // Exit the method
+        }
+
+        // Check if the domain is in the visitedRobotsTXTs map
+        if (visitedRobotsTXTs.containsKey(domain)) { // If the domain is in the map
+            if (Debug.DEBUG)
+                System.out.println("Domain is in visited robots.txt: " + domain); // Print message
+            return true; // Return true
+        } else {
+            if (Debug.DEBUG)
+                System.out.println("Domain is not in visited robots.txt: " + domain); // Print message
+            return false; // Return false
+        }
+    }
+
+    public static boolean allowedToCrawl(String url) {
+        // Code to check if allowed to crawl
+        if (Debug.DEBUG)
+            System.out.println("Checking if allowed to crawl: " + url); // Print message
+
+        // Extract the domain from the URL
+        String domain = extractDomain(url); // Set the domain to the URL for now
+
+        // Check if the domain is in the visitedRobotsTXTs map
+        if (visitedRobotsTXTs.containsKey(domain)) { // If the domain is in the map
+            RobotsTXT robotsTXT = visitedRobotsTXTs.get(domain); // Get the RobotsTXT object for the domain
+            if (robotsTXT.getDisallowedPaths().contains(url.replaceFirst(domain, ""))) { // If the URL is disallowedif (robotsTXT.getDisallowedPaths().contains(domain - url)) { // If the URL is disallowed
+                if (Debug.DEBUG)
+                    System.out.println("URL is disallowed by robots.txt: " + url); // Print message
+                return false; // Return false
+            } else {
+                // URL is allowed
+                return true; // Return true
+            }
+        } 
+        else {
+            parseRobotsTXT(url); // Parse the robots.txt file
+            return allowedToCrawl(url); // Rerun the method
+        }
+    }
+
+    public static String extractDomain(String url) {
+        // Extract the domain from the URL
+        String domain = url; // Set the domain to the URL for now
+        Pattern pattern = Pattern.compile("((http://|https://)?[^:/]+)"); // Create a pattern to match the domain
+        Matcher matcher = pattern.matcher(url); // Create a matcher for the pattern
+        if (matcher.find()) {
+            domain = matcher.group(1); // Obtain the domain and TLD, including the protocol
+            if (Debug.DEBUG)
+                System.out.println("Domain: " + domain); // Print the domain
+        } else {
+            System.out.println("Error extracting domain from URL.");
+            return url; // Exit the method
+        }
+
+        return domain; // Return the domain
+    }
+
     public void crawl(String seed) {
         pagesToVisit.add(seed); // Add the seed page to pagesToVisit
 
@@ -78,6 +252,7 @@ public class ScratchCrawler {
             try {
                 Thread.sleep(waitTime); // Wait to be polite
                 getPage(nextPage); // Get the page
+                //extractURLS(nextPage); // Parse the page
             } catch (InterruptedException e) {
                 System.out.println("Error waiting between crawling pages.");
                 e.printStackTrace();
@@ -93,5 +268,8 @@ public class ScratchCrawler {
         // Test the getNextPage method
         ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object
         crawler.crawl("https://en.wikipedia.com/"); // Start off the crawl with the seed page
+
+        // String myURL = "https://wikipedia.org/"; // Set the URL to test
+        // parseRobotsTXT(myURL); // Test the parseRobotsTXT method
     }
 }
