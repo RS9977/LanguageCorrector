@@ -30,7 +30,7 @@ public class Checker {
                     HashTableMaker manager = new HashTableMaker();
                     for (String sentence : extractedSentences) {
                         manager.updateDatabase(sentence.toLowerCase());
-                        PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence);
+                        PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 1, 4);
                         List<String> phrases = extractorPhrase.getPhrases();
                         for (String phrase : phrases) {
                             manager.updateDatabase(phrase.toLowerCase());
@@ -44,7 +44,7 @@ public class Checker {
                 try {
                     HashTableMaker manager = new HashTableMaker();
                     manager.updateDatabase(argPars.getSentence().toLowerCase());
-                    for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence()).getPhrases()) {
+                    for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),1, 4).getPhrases()) {
                         manager.updateDatabase(phrase.toLowerCase());                      
                     }
                     manager.closeConnection();
@@ -63,11 +63,16 @@ public class Checker {
                     System.out.println("*********************************************************");
                     PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence);
                     List<String> phrases = extractorPhrase.getPhrases();
-                    int score = 0;
-                    jsonMaker.addSentence(sentence.toLowerCase(), (dbInterface.checkTokenInDatabase(sentence.toLowerCase(), graph)+manager.nGram(sentence, 3))/2);
+                    int ngram        = manager.nGram(sentence, 3);
+                    int stateMachine = dbInterface.checkTokenInDatabase(sentence.toLowerCase(), graph);
+                    int conf         = (ngram>=0)?(int)(ngram*0.2+stateMachine*0.8):stateMachine;
+                    jsonMaker.addSentence(sentence.toLowerCase(), conf);
                     for (String phrase : phrases) {
                         System.out.println("Phrase: "+ phrase);
-                        jsonMaker.addPhrase(phrase.toLowerCase(), (dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph)+manager.nGram(phrase.toLowerCase(),3))/2);
+                        ngram        = manager.nGram(phrase.toLowerCase(), 3);
+                        stateMachine = dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph);
+                        conf         = (ngram>=0)?(int)(ngram*0.2+stateMachine*0.8):stateMachine;
+                        jsonMaker.addPhrase(phrase.toLowerCase(), conf);
                         System.out.println("------------------------------------------------------------");
                         
                     }

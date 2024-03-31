@@ -110,7 +110,7 @@ public class HashTableMaker {
     public int nGram(String sentence, int n){
         String[] words = sentence.split("\\s+");
         if(words.length<n)
-            return 0;
+            return -1;
         PhraseExtractor extractorPhraseN1 = PhraseExtractor.fromSentence(sentence, n-2, n-1);
         PhraseExtractor extractorPhraseN = PhraseExtractor.fromSentence(sentence, n-1, n);
         List<String> phrasesN = extractorPhraseN.getPhrases();
