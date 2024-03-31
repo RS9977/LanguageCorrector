@@ -1,7 +1,8 @@
-bin
-*.json
-*.jar
-test.*
-*.txt
-*db
-!manifest*
+CheckerCorrector/bin
+CheckerCorrector/src
+CheckerCorrector/*.json
+CheckerCorrector/*.jar
+CheckerCorrector/test.*
+CheckerCorrector/*.txt
+CheckerCorrector/*db
+!CheckerCorrector/manifest*
