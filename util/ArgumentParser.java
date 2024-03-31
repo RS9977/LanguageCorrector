@@ -10,11 +10,13 @@ public class ArgumentParser {
     private boolean updateToken;
     private boolean checkSentence;
     private boolean checkFile;
+    private boolean updateHashTable;
 
     ArgumentParser(String[] args) {
         checkSentence = false;
         updateToken = false;
         checkFile  = false;
+        updateHashTable = false;
         parseArguments(Arrays.asList(args));
     }
 
@@ -50,6 +52,9 @@ public class ArgumentParser {
                         break;
                     case "--updateToken":
                         updateToken = true;
+                        break;
+                    case "--updateHashTable":
+                        updateHashTable = true;
                         break;
                     // Add cases for other arguments here
                     default:
@@ -87,5 +92,8 @@ public class ArgumentParser {
     }
     public boolean isCheckFile(){
         return checkFile;
+    }
+    public boolean isUpdateHashTable(){
+        return updateHashTable;
     }
 }
