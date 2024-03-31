@@ -1,6 +1,7 @@
 package DirectedGraph;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,22 +27,5 @@ public class DirectedGraph<NodeClass> {
 
     public List<NodeClass> getAdjacentNodes(NodeClass node) {
         return graph.getOrDefault(node, new ArrayList<>());
-    }
-
-    public static <NC> void dfs(DirectedGraph<NC> graph, NC currentState, int depth, int maxDepth, List<NC> path, Set<String> allPaths) {
-        if (currentState.equals("dot") || depth >= maxDepth) {
-            ListToString<NC> lTS =  ListToString.of();
-            for(NC p: path){
-                lTS.addString(p);
-            }
-            allPaths.add(lTS.toString());
-            return;
-        }
-        
-        for (NC nextState : graph.getAdjacentNodes(currentState)) {
-            path.add(nextState);
-            dfs(graph, nextState, depth + 1, maxDepth, path, allPaths);
-            path.remove(path.size() - 1);
-        }
     }
 }

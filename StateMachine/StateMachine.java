@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import DirectedGraph.DirectedGraph;
+import DirectedGraph.DFS;
 
 import util.TwoListStruct;
 import util.ListToString;
@@ -46,21 +47,25 @@ public class StateMachine{
 
         StateMachine SM = new StateMachine();
         int confidence = SM.isStateMachineFollowed(graph, actions, initialState, 0);
-        if(confidence<10)
+        if(confidence<10){
+            for(int i =0; i<actions.size(); i++)
+                flags.add(0);
             return TwoListStruct.of(actions, flags);
-        else{
+        }else{
             Set<String> allPaths = new HashSet<>();
-            DirectedGraph.dfs(graph, initialState, 0, actions.size()+4, new ArrayList<>(), allPaths);
+            DFS dfs = DFS.of();
+            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.size()+2));
             StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
             for(String path: allPaths)
                 sfw.appendString(path);
             try {
                 sfw.writeToFile();
-                TypoCorrector tc = TypoCorrector.of("all_path.txt", true);
+                TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -3, 0, -2, -1);
                 ListToString lts = ListToString.of();
                 for(State action: actions)
                     lts.addString(action);
                 String suggestedActionsString = tc.closestWord(lts.getString());
+                System.out.println(lts.getString() + " -> " + suggestedActionsString);
                 List<State> parts = StringToList.split(suggestedActionsString);
                 suggestedAction.addAll(parts);
                 flags.addAll(tc.traceBack());

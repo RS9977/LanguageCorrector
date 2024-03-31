@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.plaf.synth.SynthEditorPaneUI;
+
 import util.DeepCopyTwoD;
 
 public class TypoCorrector {
@@ -14,28 +16,45 @@ public class TypoCorrector {
         readWordsFromFile(filePath);
         traceBackFlag = false;
         copyOfDirMar = DeepCopyTwoD.createEmpty();
+        closestWordString = new String();
+        removeDot = true;
+        mismatchScore  = -2;
+        matchScore = 0;
+        gapOpen   = -2;
+        gapExtend  = -1;
+        insertGapOpen  = -2;
+        insertGapExtend  = -1;
     }
 
     public static TypoCorrector of (String filename){
         return new TypoCorrector(filename);
     }
 
-    private TypoCorrector(String filePath, Boolean tBFalg){
+    private TypoCorrector(String filePath, Boolean tBFalg, int mismatchS, int mS, int gapO, int gapE){
         dic = new ArrayList<>();
         readWordsFromFile(filePath);
         traceBackFlag = tBFalg;
+        removeDot = !tBFalg;
         copyOfDirMar = DeepCopyTwoD.createEmpty();
+        closestWordString = new String();
+        mismatchScore  = mismatchS;
+        matchScore = mS;
+        gapOpen   = gapO;
+        gapExtend  = gapE;
+        insertGapOpen  = gapO;
+        insertGapExtend  = gapE;
     }
 
-    public static TypoCorrector of (String filename, Boolean tBFalg){
-        return new TypoCorrector(filename, tBFalg);
+    public static TypoCorrector of (String filename, Boolean tBFalg, int mismatchS, int mS, int gapO, int gapE){
+        return new TypoCorrector(filename, tBFalg, mismatchS, mS, gapO, gapE);
     }
 
     public void readWordsFromFile(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                line = line.replaceAll("[^a-zA-Z ]", "").toLowerCase(); // Remove non-alphabetic characters and convert to lowercase
+                if(removeDot)
+                    line = line.replaceAll("[^a-zA-Z ]", "").toLowerCase(); // Remove non-alphabetic characters and convert to lowercase
                 String[] words = line.split("\\s+"); // Split the line by spaces
                 for (String word : words) {
                     if (!word.isEmpty()) {
@@ -49,19 +68,18 @@ public class TypoCorrector {
     }
     
     public String closestWord(String word) {
-        if(word.equals(".") || word.equals(","))
-            return word;
+        if(removeDot){
+            if(word.equals(".") || word.equals(","))
+                return word;
+        }
         int curMax = -(1<<30);
         String wordMax = new String();
         int indCur = 0;
-
-        DeepCopyTwoD copyOfDirMar = DeepCopyTwoD.createEmpty();
         for(String dicS: dic){
             int m = dicS.length();
             int n = word.length();
-            int[][] scoreMat = new int[m+1][n+1];
-            int[][] dirMat   = new int[m+1][n+1];
-
+            int[][] scoreMat  = new int[m+1][n+1];
+            int[][] dirMat    = new int[m+1][n+1];
             for(int i=1; i<=n; i++){
                 scoreMat[0][i] = (i-1)*gapExtend+gapOpen;
             }
@@ -79,7 +97,6 @@ public class TypoCorrector {
 
                     curScore = diag;
                     dirMat[i][j]= s-1;
-
                     if(up>curScore){
                     curScore = up;
                     dirMat[i][j]= 2;
@@ -96,24 +113,39 @@ public class TypoCorrector {
             if(disCur>curMax){
                 wordMax = dicS;
                 curMax = disCur;
-                if(traceBackFlag)
+                if(traceBackFlag){
                     copyOfDirMar.setArray(dirMat);
+                }
             }
             indCur ++;
         }  
-        return (curMax<4 && wordMax.length()>0)?wordMax:word;
+        closestWordString = new String((curMax<4 && wordMax.length()>0)?wordMax:word);
+        return closestWordString;
         
     }
     
     public List<Integer> traceBack(){
         int [][] dirMat     = copyOfDirMar.getArray();
-        copyOfDirMar.displayArray();
         List<Integer> trace = new ArrayList<>();
         if(traceBackFlag){
             int m = dirMat.length;
             if(m>0){
                 int n = dirMat[0].length;
-                return traceBackRecursion(dirMat, trace, m-1, n-1);
+                trace.addAll(traceBackRecursion(dirMat, trace, m-1, n-1));
+                String[] closestWordList = closestWordString.split("\\.");
+                for(Integer s: trace)
+                    System.out.print(s + " ");
+                System.out.println();
+                List<Integer> traceInverse = new ArrayList<>();
+                int traceCnt = 0;
+                boolean flagDotSeen = false;
+                int tempTrace = 0;
+                for(int i=closestWordString.length()-1; i>=0; i--){
+                    if(i%2==1)
+                        traceInverse.add(trace.get(i));
+                }
+                System.out.println();
+                return traceInverse;
             }else{
                 return trace;
             }
@@ -125,7 +157,6 @@ public class TypoCorrector {
         if(i==0 && j==0){
             return trace;
         }
-        System.out.println(i + " " + j);
         int curDir = dirMat[i][j];
         if(curDir==2){
             trace.add(2);
@@ -149,14 +180,15 @@ public class TypoCorrector {
 
     ArrayList<String> dic;
     boolean traceBackFlag;
+    boolean removeDot;
+    String closestWordString;
     DeepCopyTwoD copyOfDirMar;
-    final int mismatchScore  = -2;
-    final int matchScore = 0;
-    final int gapOpen   = -2;
-    final int gapExtend  = -1;
-    final int insert  = -1;
-    final int insertGapOpen  = -2;
-    final int insertGapExtend  = -1;
+    final int mismatchScore;
+    final int matchScore;
+    final int gapOpen;
+    final int gapExtend;
+    final int insertGapOpen;
+    final int insertGapExtend;
     final int minusInf = -(1<<4);
     
 }

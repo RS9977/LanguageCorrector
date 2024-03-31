@@ -6,16 +6,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-public class ListToString<ListObject> {
+import StateMachine.State;
+
+public class ListToString {
     StringBuilder finalString;
-    ListToString(){
+    private ListToString(){
         finalString = new StringBuilder();
     }
-    public static<LO> ListToString<LO> of (){
-        return new ListToString<>();
+    public static ListToString of (){
+        return new ListToString();
     }
-    public void addString(ListObject s){
-        finalString.append(s);
+    public void addString(State s){
+        finalString.append(State.mapToChar(s));//.toString().substring(0,3));
         finalString.append(".");
     }
     public String getString(){

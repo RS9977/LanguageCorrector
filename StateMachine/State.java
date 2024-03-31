@@ -37,4 +37,29 @@ public enum  State {
         static public State first() {
             return State.values()[0];
         }
+
+        public static char mapToChar(State element) {
+            return (char) ('a' + element.ordinal());
+        }
+    
+        // Function to perform reverse mapping from characters 'a' to 'z' to enum elements
+        public static State mapToEnum(char character) {
+            int index = character - 'a';
+            if (index >= 0 && index < values().length) {
+                return values()[index];
+            } else {
+                throw new IllegalArgumentException("Character is not in range 'a' to 'z'");
+            }
+        }
+
+        // Function to perform reverse mapping from characters 'a' to 'z' to enum elements
+        public static State mapToEnum(String character) {
+            int index = character.charAt(0) - 'a';
+            if (index >= 0 && index < values().length) {
+                return values()[index];
+            } else {
+                throw new IllegalArgumentException("Character is not in range 'a' to 'z'");
+            }
+        }
+        
 }

@@ -13,7 +13,8 @@ public class StringToList {
             throw new IllegalArgumentException("Input string cannot be null or empty");
         }
         return Arrays.stream(input.split("\\."))
-                     .map(State::fromString)
+                     //.map(State::fromString)
+                     .map(State::mapToEnum)
                      .collect(Collectors.toList());
     }
 }

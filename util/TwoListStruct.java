@@ -24,4 +24,12 @@ public class TwoListStruct<NodeClass, ChangeClass> {
     public List<NodeClass> getOutputList() {
         return outputList;
     }
+    public void displayArrays(){
+        for(NodeClass out: outputList)
+            System.out.print(out + ", ");
+        System.out.println("\n-------------");
+        for(ChangeClass cha: changesList)
+            System.out.print(cha + ", ");
+        System.out.println("\n***************************************************");
+    }
 }

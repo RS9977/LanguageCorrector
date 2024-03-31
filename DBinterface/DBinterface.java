@@ -138,6 +138,7 @@ public class DBinterface {
             // Check if the sequence of actions follows the state machine
 
             TwoListStruct<State, Integer> output = SM.suggestedStateMachine(graph, actions, initialState);
+            output.displayArrays();
             List<State> suggested = output.getOutputList();
             List<Integer> flags   = output.getChangesList();
             int insertCnt = 0;
@@ -158,7 +159,7 @@ public class DBinterface {
                                 tokenList.add(word);
                         }
                     }
-                }else if(flags.get(i)==2){
+                }else if(flags.get(i)==3){
                     try (Statement statement = connection.createStatement()) {
                         System.out.println(suggested.get(i));
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
@@ -169,7 +170,7 @@ public class DBinterface {
                             word = resultSet.getString("word");
                             System.out.println("Here I am: "+ word);
                             if(i<tokenList.size())
-                                tokenList.add(i-insertCnt,word);
+                                tokenList.add(i,word);
                             else
                                 tokenList.add(word);
                         }

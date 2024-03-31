@@ -1,44 +1,58 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class test {
-    public static List<Integer> compareLists(List<Object> first, List<Object> second) {
-        List<Integer> result = new ArrayList<>();
-        int maxLength = Math.max(first.size(), second.size());
+    private int[][] array;
 
-        for (int i = 0; i < maxLength; i++) {
-            Object obj1 = (i < first.size()) ? first.get(i) : null;
-            Object obj2 = (i < second.size()) ? second.get(i) : null;
-
-            if (obj1 == null && obj2 != null) {
-                result.add(2); // Element in second but not in first
-            } else if (obj1 != null && obj2 == null) {
-                result.add(3); // Element in first but not in second
-            } else if (obj1.equals(obj2)) {
-                result.add(0); // Elements are equal
-            } else {
-                result.add(1); // Elements are not equal
-            }
-        }
-
-        return result;
+    private test(int[][] array) {
+        this.array = array;
     }
 
+    public static test createEmpty() {
+        return new test(new int[0][0]);
+    }
+
+    public void setArray(int[][] newArray) {
+        // Perform deep copy of the input array
+        int[][] copiedArray = new int[newArray.length][];
+        for (int i = 0; i < newArray.length; i++) {
+            copiedArray[i] = new int[newArray[i].length];
+            System.arraycopy(newArray[i], 0, copiedArray[i], 0, newArray[i].length);
+        }
+        this.array = copiedArray;
+    }
+
+    public int[][] getArray() {
+        // Perform deep copy before returning the array
+        int[][] copiedArray = new int[array.length][];
+        for (int i = 0; i < array.length; i++) {
+            copiedArray[i] = new int[array[i].length];
+            System.arraycopy(array[i], 0, copiedArray[i], 0, array[i].length);
+        }
+        return copiedArray;
+    }
+
+    // You can add more methods as needed
+
     public static void main(String[] args) {
-        List<Object> first = new ArrayList<>();
-        first.add("a");
-        first.add("b");
-        first.add("e");
-        
+        test container = test.createEmpty();
 
-        List<Object> second = new ArrayList<>();
-        second.add("a");
-        second.add("h");
-        second.add("b");
-        second.add("e");
-        second.add("h");
+        // Display empty array
+        System.out.println("Empty Array:");
+        displayArray(container.getArray());
 
-        List<Integer> comparisonResult = compareLists(first, second);
-        System.out.println("Comparison result: " + comparisonResult);
+        // Replace array with new values
+        int[][] newArray = {{9, 8, 7}, {6, 5, 4}, {3, 2, 1}};
+        container.setArray(newArray);
+
+        // Display new array
+        System.out.println("\nNew Array:");
+        displayArray(container.getArray());
+    }
+
+    private static void displayArray(int[][] array) {
+        for (int[] row : array) {
+            for (int value : row) {
+                System.out.print(value + " ");
+            }
+            System.out.println();
+        }
     }
 }
