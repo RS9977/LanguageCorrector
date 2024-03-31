@@ -5,6 +5,7 @@ public enum  State {
         PRONOUN,    // State for processing a pronoun token
         ARTICLE,    // State for article
         VERB,       // State for processing a verb token
+        IS,
         ADJECTIVE,   // State for processing an adjective token
         NOUN,   // State for processing a noun
         ADVERB,
@@ -12,6 +13,12 @@ public enum  State {
         CONJ,
         END,
         COMMA,
+        THAT,
+        IF,
+        OF,
+        CAN,
+        NOT,
+        DOES,
         NAN;   // State for processing a noun
 
         @Override

@@ -35,7 +35,7 @@ public class DBinterface {
                     ResultSet resultSet = statement.executeQuery(query);
                     if (resultSet.next()) {
                         role = resultSet.getString("role");
-                        System.out.print("first try: " + token + " -> " + role);
+                        ////System.out.print("first try: " + token + " -> " + role);
                         tokens[i] = role;
                     }else{
                         String tokenCorrected = new String();
@@ -43,20 +43,20 @@ public class DBinterface {
                             tokenCorrected = typoChecker.closestWord(token);
                             if(!tokenCorrected.equals(token))
                                 initialConf += 5;
-                            System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+                            ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
                             query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
                             // Replace the token with its role
                             resultSet = statement.executeQuery(query);
                             if (resultSet.next()) {
                                 role = resultSet.getString("role");
-                                System.out.print("| Second try: "+ token + " -> " + role);
+                                ////System.out.print("| Second try: "+ token + " -> " + role);
                                 tokens[i] = role;
                             }
                         }
 
                     } 
                     }
-                    System.out.println();
+                    ////System.out.println();
             }
 
             List<State> actions = new ArrayList<>();
@@ -70,14 +70,24 @@ public class DBinterface {
             // Check if the sequence of actions follows the state machine
 
             int confidence = SM.isStateMachineFollowed(graph, actions, initialState, initialConf);
-            System.out.print("The confidence score is: "+ confidence + "\n");
+            //System.out.print("The confidence score is: "+ confidence + "\n");
             return confidence;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0;
     }
+
     public String correctTokenInDatabase(String sentence, DirectedGraph<State> graph){
+        for(int i=0; i<2; i++){
+            sentence = new String(correctTokenInDatabaseInnerloop(sentence, graph));
+            if(checkTokenInDatabase(sentence, graph)<10)
+                break;
+        }
+        return sentence;
+    }
+
+    private String correctTokenInDatabaseInnerloop(String sentence, DirectedGraph<State> graph){
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
@@ -101,7 +111,7 @@ public class DBinterface {
                     ResultSet resultSet = statement.executeQuery(query);
                     if (resultSet.next()) {
                         role = resultSet.getString("role");
-                        //System.out.print("first try: " + token + " -> " + role);
+                        //////System.out.print("first try: " + token + " -> " + role);
                         tokens[i] = role;
                     }else{
                         String tokenCorrected = new String();
@@ -109,7 +119,7 @@ public class DBinterface {
                             tokenCorrected = typoChecker.closestWord(token);
                             if(!tokenCorrected.equals(token))
                                 initialConf += 5;
-                           // System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+                           // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
 
                             query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
                             // Replace the token with its role
@@ -117,14 +127,14 @@ public class DBinterface {
                             if (resultSet.next()) {
                                 tokenList.set(i,tokenCorrected);
                                 role = resultSet.getString("role");
-                              //  System.out.print("| Second try: "+ token + " -> " + role);
+                              //  ////System.out.print("| Second try: "+ token + " -> " + role);
                                 tokens[i] = role;
                             }
                         }
 
                     } 
                     }
-                    //System.out.println();
+                    //////System.out.println();
             }
 
             List<State> actions = new ArrayList<>();
@@ -138,21 +148,29 @@ public class DBinterface {
             // Check if the sequence of actions follows the state machine
 
             TwoListStruct<State, Integer> output = SM.suggestedStateMachine(graph, actions, initialState);
-            output.displayArrays();
+           // output.displayArrays();
             List<State> suggested = output.getOutputList();
             List<Integer> flags   = output.getChangesList();
             int delCnt = 0;
+            boolean seenDot = false;
+            int     indDotseen = Math.max(suggested.size()+1, flags.size()+1);
             for(int i=0; i<suggested.size(); i++){
+                if(seenDot){
+                    //indDotseen = i;
+                   // break;
+                }
+                if(suggested.get(i) == State.DOT)
+                    seenDot = true;
                 if(flags.get(i+delCnt)==1){
                     try (Statement statement = connection.createStatement()) {
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
                         String word = new String();
                         ResultSet resultSet = statement.executeQuery(query);
                         
-                        System.out.print("!!! 1: " + resultSet + "| ");
+                        ////System.out.print("!!! 1: " + resultSet + "| ");
                         if (resultSet.next()) {
                             word = resultSet.getString("word");
-                            System.out.println("Here I am: "+ word);
+                            ////System.out.println("Here I am: "+ word);
                             if(i<tokenList.size())
                                 tokenList.set(i,word);
                             else
@@ -164,13 +182,13 @@ public class DBinterface {
                     tokenList.remove(i);
                 }else if(flags.get(i+delCnt)==3){
                     try (Statement statement = connection.createStatement()) {
-                        System.out.println(suggested.get(i));
+                        ////System.out.println(suggested.get(i));
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
                         String word = new String();
                         ResultSet resultSet = statement.executeQuery(query);
                         if (resultSet.next()) {
                             word = resultSet.getString("word");
-                            System.out.println("Here I am: "+ word);
+                            ////System.out.println("Here I am: "+ word);
                             if(i<tokenList.size())
                                 tokenList.add(i,word);
                             else
@@ -181,11 +199,15 @@ public class DBinterface {
             }   
             StringBuilder result = new StringBuilder();
             boolean flagStart = false;
+            int i = 0;
             for (String token : tokenList) {
+                if(i==indDotseen)
+                    break;
                 if(flagStart && !token.equals(".") && !token.equals(","))
                     result.append(" ");
                 result.append(token);
                 flagStart = true;  
+                i++;
             }
             return result.toString();
         } catch (SQLException e) {

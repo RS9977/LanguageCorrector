@@ -26,13 +26,18 @@ public class DFS {
         return allPaths;
     }
     private void dfsRecurssion(DirectedGraph<State> graph, State currentState, int depth, int maxDepth, List<State> path) {
-        if (currentState.equals("dot") || depth >= maxDepth) {
+        if ((currentState == State.DOT)) {
             ListToString lTS =  ListToString.of();
             StringBuilder sb = new StringBuilder();
+            int cnt=0;
             for(State p: path){
                 lTS.addString(p);
+                cnt++;
             }
-            allPaths.add(lTS.getString());
+            if(cnt>(maxDepth-4))
+                allPaths.add(lTS.getString());
+            return;
+        }else if(depth >= maxDepth){
             return;
         }
         List<State> transitions = graph.getAdjacentNodes(currentState);

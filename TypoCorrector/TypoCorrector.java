@@ -133,9 +133,6 @@ public class TypoCorrector {
                 int n = dirMat[0].length;
                 trace.addAll(traceBackRecursion(dirMat, trace, m-1, n-1));
                 String[] closestWordList = closestWordString.split("\\.");
-                for(Integer s: trace)
-                    System.out.print(s + " ");
-                System.out.println();
                 List<Integer> traceInverse = new ArrayList<>();
                 int traceCnt = 0;
                 boolean flagDotSeen = false;
@@ -144,7 +141,6 @@ public class TypoCorrector {
 
                     traceInverse.add(trace.get(i));
                 }
-                System.out.println();
                 return traceInverse;
             }else{
                 for(int i=closestWordString.length()-1; i>=0; i-=2){

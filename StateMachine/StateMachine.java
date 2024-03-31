@@ -19,24 +19,24 @@ public class StateMachine{
 
     public int isStateMachineFollowed(DirectedGraph<State> graph, List<State> actions, State initialState, int initialConf) {
         int confidence = initialConf;
-        //System.out.println("----------------------------------------------------");
+        ////System.out.println("----------------------------------------------------");
         State currentState = initialState;
         for (State action : actions) {
-            //System.out.print(currentState);
+            ////System.out.print(currentState);
             List<State> transitions = graph.getAdjacentNodes(currentState);
             if (!transitions.contains(action)) {
-                //System.out.print("? " + action);
+                ////System.out.print("? " + action);
                 currentState = State.START;
                 confidence += 10; // Action not allowed in current state
                 
             }
-            //System.out.println();
+            ////System.out.println();
             currentState = action; // Transition to the next state
         }
         return confidence;
     }
     public TwoListStruct suggestedStateMachine(DirectedGraph<State> graph, List<State> actions, State initialState) {
-        //System.out.println("----------------------------------------------------");
+        ////System.out.println("----------------------------------------------------");
         State currentState = initialState;
         boolean flag = false;
         List<State> suggestedAction = new ArrayList<>();
@@ -60,12 +60,12 @@ public class StateMachine{
                 sfw.appendString(path);
             try {
                 sfw.writeToFile();
-                TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -3, 0, -2, -1);
+                TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -6, 0, -3, -1);
                 ListToString lts = ListToString.of();
                 for(State action: actions)
                     lts.addString(action);
                 String suggestedActionsString = tc.closestWord(lts.getString());
-                System.out.println(lts.getString() + " -> " + suggestedActionsString);
+                ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
                 List<State> parts = StringToList.split(suggestedActionsString);
                 suggestedAction.addAll(parts);
                 flags.addAll(tc.traceBack());
@@ -82,7 +82,7 @@ public class StateMachine{
     /*
     public TwoListStruct suggestedStateMachine(DirectedGraph<State> graph, List<State> actions, State initialState) {
         
-        //System.out.println("----------------------------------------------------");
+        ////System.out.println("----------------------------------------------------");
         State currentState = initialState;
         boolean flag = false;
         List<State> suggestedAction = new ArrayList<>();
@@ -93,7 +93,7 @@ public class StateMachine{
         for(int i=0; i<actions.size(); i++){
         //for (State action : actions) {
             State action = actions.get(i);
-            System.out.print(currentState);
+            //System.out.print(currentState);
             
             List<State> transitions = graph.getAdjacentNodes(currentState);
             if(flag && cnt <2){
@@ -102,7 +102,7 @@ public class StateMachine{
                     if(checkState != State.START){
                         List<State> checkTransitions = graph.getAdjacentNodes(checkState);
                         if(checkTransitions.contains(action)){
-                            System.out.print("| updated to: "+ checkState);
+                            //System.out.print("| updated to: "+ checkState);
                             suggestedAction.add(checkState);
                             flags.add(1);
                         }
