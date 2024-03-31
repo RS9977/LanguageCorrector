@@ -132,23 +132,4 @@ public class HashTableMaker {
         double p = ((double)cntCurN)/((double)cntCurN1);
         return 100 - (int)p;
     }
-    public static void main(String[] args) {
-        try {
-            HashTableMaker manager = new HashTableMaker();
-
-            // Loading hashed sentences from the database into a HashMap
-            HashMap<String, Integer> hashedSentences = manager.loadHashedSentences();
-            System.out.println("Loaded Hashed Sentences:");
-            System.out.println(hashedSentences);
-
-            // Updating the database with a new phrase
-            manager.updateDatabase("This is a test phrase.");
-            System.out.println("Updated Hashed Sentences:");
-            System.out.println(manager.loadHashedSentences());
-
-            manager.closeConnection();
-        } catch (SQLException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-    }
 }
