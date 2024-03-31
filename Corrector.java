@@ -29,7 +29,7 @@ public class Corrector {
             
             for (String sentence : extractedSentences) {
                 System.out.println("Sentence: " + sentence);
-                stringWriter.appendString(dbInterface.correctTokenInDatabase(sentence, graph));
+                stringWriter.appendString(dbInterface.correctTokenInDatabase(sentence.toLowerCase(), graph));
 
                 try {
                     stringWriter.writeToFile();
@@ -43,7 +43,7 @@ public class Corrector {
         }else if(argPars.isCheckSentence()){
 
             System.out.println("Sentence: " + argPars.getSentence());
-            stringWriter.appendString(dbInterface.correctTokenInDatabase(argPars.getSentence(), graph));
+            stringWriter.appendString(dbInterface.correctTokenInDatabase(argPars.getSentence().toLowerCase(), graph));
             try {
                 stringWriter.writeToFile();
                 System.out.println("Corrected version has been written to the file.");

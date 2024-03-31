@@ -141,9 +141,9 @@ public class DBinterface {
             output.displayArrays();
             List<State> suggested = output.getOutputList();
             List<Integer> flags   = output.getChangesList();
-            int insertCnt = 0;
+            int delCnt = 0;
             for(int i=0; i<suggested.size(); i++){
-                if(flags.get(i)==1){
+                if(flags.get(i+delCnt)==1){
                     try (Statement statement = connection.createStatement()) {
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
                         String word = new String();
@@ -159,14 +159,16 @@ public class DBinterface {
                                 tokenList.add(word);
                         }
                     }
-                }else if(flags.get(i)==3){
+                }else if(flags.get(i+delCnt)==2){
+                    delCnt++;
+                    tokenList.remove(i);
+                }else if(flags.get(i+delCnt)==3){
                     try (Statement statement = connection.createStatement()) {
                         System.out.println(suggested.get(i));
                         String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
                         String word = new String();
                         ResultSet resultSet = statement.executeQuery(query);
                         if (resultSet.next()) {
-                            insertCnt++;
                             word = resultSet.getString("word");
                             System.out.println("Here I am: "+ word);
                             if(i<tokenList.size())

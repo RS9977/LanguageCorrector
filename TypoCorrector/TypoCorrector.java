@@ -140,13 +140,16 @@ public class TypoCorrector {
                 int traceCnt = 0;
                 boolean flagDotSeen = false;
                 int tempTrace = 0;
-                for(int i=closestWordString.length()-1; i>=0; i--){
-                    if(i%2==1)
-                        traceInverse.add(trace.get(i));
+                for(int i=trace.size()-1; i>=0; i-=2){
+
+                    traceInverse.add(trace.get(i));
                 }
                 System.out.println();
                 return traceInverse;
             }else{
+                for(int i=closestWordString.length()-1; i>=0; i-=2){
+                    trace.add(0);
+                }
                 return trace;
             }
         }else{

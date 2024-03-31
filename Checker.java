@@ -24,13 +24,13 @@ public class Checker {
             
             for (String sentence : extractedSentences) {
                 System.out.println("Sentence: " + sentence);
-                jsonMaker.addSentence(sentence, dbInterface.checkTokenInDatabase(sentence, graph));
+                jsonMaker.addSentence(sentence.toLowerCase(), dbInterface.checkTokenInDatabase(sentence.toLowerCase(), graph));
                 System.out.println("*********************************************************");
                 PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence);
                 List<String> phrases = extractorPhrase.getPhrases();
                 for (String phrase : phrases) {
                     System.out.println("Phrase: "+ phrase);
-                    jsonMaker.addPhrase(phrase, dbInterface.checkTokenInDatabase(phrase, graph));
+                    jsonMaker.addPhrase(phrase.toLowerCase(), dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph));
                     System.out.println("------------------------------------------------------------");
                 }
                 jsonMaker.toJson("data.json");
@@ -40,13 +40,13 @@ public class Checker {
         }else if(argPars.isCheckSentence()){
 
             System.out.println("Sentence: " + argPars.getSentence());
-            jsonMaker.addSentence(argPars.getSentence(), dbInterface.checkTokenInDatabase(argPars.getSentence(), graph));
+            jsonMaker.addSentence(argPars.getSentence().toLowerCase(), dbInterface.checkTokenInDatabase(argPars.getSentence().toLowerCase(), graph));
             System.out.println("*********************************************************");
-            PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(argPars.getSentence());
+            PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(argPars.getSentence().toLowerCase());
             List<String> phrases = extractorPhrase.getPhrases();
             for (String phrase : phrases) {
                 System.out.println("Phrase: " + phrase);
-                jsonMaker.addPhrase(phrase, dbInterface.checkTokenInDatabase(phrase, graph));
+                jsonMaker.addPhrase(phrase, dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph));
                 System.out.println("------------------------------------------------------------");
             }
             jsonMaker.toJson("data.json");

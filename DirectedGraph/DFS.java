@@ -21,6 +21,7 @@ public class DFS {
 
     public Set<String> dfs(DirectedGraph<State> graph, State currentState, int maxDepth){
         List<State> path = new ArrayList<>();
+        path.add(currentState);
         dfsRecurssion(graph, currentState, 0, maxDepth, path);
         return allPaths;
     }

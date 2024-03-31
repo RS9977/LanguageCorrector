@@ -46,7 +46,7 @@ public class StateMachine{
         int cnt = 0;
 
         StateMachine SM = new StateMachine();
-        int confidence = SM.isStateMachineFollowed(graph, actions, initialState, 0);
+        int confidence = SM.isStateMachineFollowed(graph, actions, actions.get(0), 0);
         if(confidence<10){
             for(int i =0; i<actions.size(); i++)
                 flags.add(0);
@@ -54,7 +54,7 @@ public class StateMachine{
         }else{
             Set<String> allPaths = new HashSet<>();
             DFS dfs = DFS.of();
-            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.size()+2));
+            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.size()+1));
             StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
             for(String path: allPaths)
                 sfw.appendString(path);
