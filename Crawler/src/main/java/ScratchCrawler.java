@@ -13,6 +13,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.stream.Stream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class ScratchCrawler {
     public static final int MAX_PAGES = 100; // Maximum pages to crawl
     public static long waitTime = 200; // Time to wait between requests in milliseconds
@@ -49,8 +53,7 @@ public class ScratchCrawler {
     // https://docs.oracle.com/javase/tutorial/networking/urls/index.html
     public void getPage(String url) {
         // Code to get the page
-        if(Debug.DEBUG)
-            System.out.println("Getting page: " + url); // Print message
+        System.out.println("Getting page: " + url); // Print message
 
         if (url.endsWith(")")) {
             url = url.substring(0, url.length() - 1);
@@ -102,11 +105,14 @@ public class ScratchCrawler {
             
             // Code to read the page
             BufferedReader reader = new BufferedReader(new InputStreamReader(pageURL.openStream())); // Create a new BufferReader object
-            PrintWriter writer = new PrintWriter(new FileWriter("src/main/resources/crawledData.txt",true)); // Create a new PrintWriter object
-            String line; // Declare a string to store each line of the page
+            PrintWriter writer = new PrintWriter(new FileWriter("crawledData.txt",true)); // Create a new PrintWriter object
             
-            while ((line = reader.readLine()) != null) { // While there are lines to read
-                writer.println(line); // Write the line to the file
+            String line; // Declare a string to store each line of the page
+            StringBuilder pageContent = new StringBuilder(); // To store the page content
+
+            
+            while ((line = reader.readLine()) != null && pageContent.length() < 1024) { // While there are lines to read
+                pageContent.append(line); // Add the line to the page content
                 
                 // Extract links from the page
                 List<String> links = RegexParser.extractLinks(line); // Extract the links from the line
@@ -116,6 +122,9 @@ public class ScratchCrawler {
                     }
                 }
             }
+            // Write the page content to the file, up to 1KB
+            writer.println(pageContent.toString().substring(0, Math.min(1024, pageContent.length())));      
+
             writer.close(); // Close the writer
             reader.close(); // Close the reader
 
@@ -293,15 +302,48 @@ public class ScratchCrawler {
 
         System.out.println("Crawling complete."); // Print message
     }
+    public void crawl() {
+        while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
+            String nextPage = getNextPage(); // Get the next page
+            try {
+                Thread.sleep(waitTime); // Wait to be polite
+                getPage(nextPage); // Get the page
+            } catch (InterruptedException e) {
+                System.out.println("Error waiting between crawling pages.");
+                e.printStackTrace();
+            } // 
+        }
+
+        System.out.println("Crawling complete."); // Print message
+    }
+
+    public void readURLsFromFile(String filePath) {
+        try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
+            List<String> urls = stream.collect(Collectors.toList()); // Convert the stream to a list
+            for (String url : urls) { // Iterate over the list
+                pagesToVisit.add(url);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + filePath);
+            e.printStackTrace();
+        }
+    }
 
 
     // For testing purposes
     public static void main(String[] args) {
-        // Test the getNextPage method
-        ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object
-        crawler.crawl("https://archive.org/details/bostonpubliclibrary"); // Start off the crawl with the seed page
 
-        // String myURL = "https://wikipedia.org/"; // Set the URL to test
-        // parseRobotsTXT(myURL); // Test the parseRobotsTXT method
+        ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object
+        //crawler.crawl("https://archive.org/details/bostonpubliclibrary"); // Start off the crawl with the seed page
+
+        // Parse command-line arguments
+        for (int i = 0; i < args.length; i++) {
+            if ("--file".equals(args[i]) && i + 1 < args.length) {
+                String filePath = args[i + 1];
+                crawler.readURLsFromFile(filePath);
+            }
+        }
+
+        crawler.crawl(); // Start off the crawl with the seed pages
     }
 }
