@@ -1,4 +1,8 @@
 # Group6
+Our webcrawler and langauge checker project. 
+Webcrawler by Alex Melnick
+Data Parser by Michael
+Language checker by Reza Sajjadi
 
 ## Libraries used:
 jsoup - https://jsoup.org/
