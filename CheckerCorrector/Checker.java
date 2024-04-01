@@ -77,7 +77,7 @@ public class Checker {
                         
                     }
                     
-                    jsonMaker.toJson("data.json");
+                    jsonMaker.toJson("confidence_ourChecker.json");
                     System.out.println("##########################################################");
                     
                 }
@@ -96,7 +96,7 @@ public class Checker {
                 jsonMaker.addPhrase(phrase, dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph));
                 System.out.println("------------------------------------------------------------");
             }
-            jsonMaker.toJson("data.json");
+            jsonMaker.toJson("confidence_ourChecker.json");
             System.out.println("##########################################################");
         }
           
