@@ -1,8 +1,3 @@
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,37 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexParser {
-
-    /*public static void main(String[] args) {
-        // Read URLs from a text file
-        List<String> urls = readUrlsFromFile("urls.txt");
-        List<String> links = new ArrayList<String>();
-        List<String> sentences = new ArrayList<String>();
-
-        // Parse each webpage and gather information
-        for (String url : urls) {
-            try {
-                // Fetch the webpage using JSoup
-                Document doc = Jsoup.connect(url).get();
-
-                // Extract all the text content from the page
-                String allText = getAllText(doc);
-
-                // Find all sentences in the text
-                sentences = findSentences(allText);
-
-                // Extract links from the page
-               //links = extractLinks(doc);
-
-                // Write sentences and links to a file
-                writeToFile(sentences, links, "output_" + getFilenameFromUrl(url) + ".txt");
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }*/
-
     // Function to read URLs from a text file
     private static List<String> readUrlsFromFile(String filename) {
         List<String> urls = new ArrayList<>();
@@ -53,11 +17,6 @@ public class RegexParser {
             e.printStackTrace();
         }
         return urls;
-    }
-
-    // Function to extract all text content from the page
-    private static String getAllText(Document doc) {
-        return doc.text();
     }
 
     // Function to find all sentences in the given text
