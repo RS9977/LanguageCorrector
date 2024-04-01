@@ -1,5 +1,5 @@
 # Group6
-Our webcrawler and langauge checker project. 
+Our java webcrawler and langauge checker project. 
 
 Webcrawler by Alex Melnick 
 
