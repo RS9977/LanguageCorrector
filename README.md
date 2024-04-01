@@ -11,7 +11,7 @@ Language checker and corrector by Reza Sajjadi
 https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 
 ## Libraries
-The only library used for the checker and corrector is https://github.com/xerial/sqlite-jdbc and it's dependency https://www.slf4j.org. These are both provided in the repo, and there is no need to download them.
+The only library used for the checker and corrector is https://github.com/xerial/sqlite-jdbc and its dependency https://www.slf4j.org. These are both provided in the repo, and there is no need to download them.
 
 ## Usage
 To run the webcrawler, simply create a ScratchCrawler object and run the .crawl command with the seed URL as the arguement.
