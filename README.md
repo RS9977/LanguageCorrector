@@ -17,11 +17,7 @@ The only library used for the checker and corrector is https://github.com/xerial
 
 ## Usage
 ### Web Crawler
-To run the webcrawler, simply create a ScratchCrawler object and run the .crawl command with the seed URL as the argument.
-
-`ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object`
-
-`crawler.crawl("https://archive.org/details/bostonpubliclibrary"); // Start off the crawl with the seed page`
+To run the webcrawler, run `./crawler --file [PATH]`. Alternatively, `java ScratchCrawler --file [PATH]` also works.
 
 ### Checker/Corrector
 To build the project for CheckerCorrector we are using a make file. running `make dev_corrector` and `make dev_checker` will compile and build the `checker.jar` and `corrector.jar` with the user interface requested.
