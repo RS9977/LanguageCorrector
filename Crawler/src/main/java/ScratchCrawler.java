@@ -1,6 +1,7 @@
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,7 @@ public class ScratchCrawler {
     public static double processingRatePages = 0; // Processing rate in pages per second (inverse waitTime)
     public static double processingRateLinks = 0; // Processing rate in links per second
     public static double processingRateSize = 0; // Processing rate in bytes per second
+    public static boolean printStats = false; // Print stats flag
     
 
     // Using a HashSet to store visited pages and pages to visit. This is the best data structure 
@@ -35,6 +37,11 @@ public class ScratchCrawler {
     public static Set<String> pagesVisited = new HashSet<String>(); // Set to store visited pages
     public static Set<String> pagesToVisit = new HashSet<String>(); // Set to store pages to visit
     public static Set<String> disallowedDomains = new HashSet<String>(); // Set to store disallowed domains
+    public static Set<String> whitelist = new HashSet<String>(Arrays.asList( // Set to store whitelisted domains
+        // Add whitelisted domains here   
+        //"https://www.usenetarchives.com" // Our social media platform for crawling (approved by Prof. Trachtenberg)
+    ));
+
 
     // In order to store the robots.txt restrictions, we are going to use a HashMap with the domain 
     // as the key and an object representing the restrictions as the value. This is the best data
@@ -62,7 +69,9 @@ public class ScratchCrawler {
         // Code to get the page
 
         // Provide real-time status and statistics feedback for the crawler
-        System.out.println("Processing URL: " + url); 
+        if (printStats) {
+            System.out.println("Processing URL: " + url); 
+        }
 
         // REMOVE ME - fixing RegexParser.extractLinks() to handle URLs ending with ')'
         // if (url.endsWith(")")) {
@@ -138,17 +147,21 @@ public class ScratchCrawler {
 
             // Provide real-time status and statistics feedback for the crawler
             totalSize += pageContent.length();
-            System.out.println("Length of page processed [Bytes]: " + pageContent.length());
-            System.out.println("Total size of pages visited [Bytes]: " + totalSize);
-            System.out.println("Number of links extracted: " + linksExtracted);
-            System.out.println("Number of pages crawled  (" + MAX_PAGES + " pages max): " + pagesVisited.size());
-            System.out.println("URLs available to crawl: " +  pagesToVisit.size());
             processingRatePages = 1000 / (double)waitTime; // Processing rate in pages per second (inverse waitTime)
             processingRateLinks = linksExtracted * processingRatePages; // Processing rate in links per second
             processingRateSize = pageContent.length() * processingRatePages; // Processing rate in bytes per second
-            System.out.println("Processing rate in pages per second: " + processingRatePages);
-            System.out.println("Processing rate in links per second: " + processingRateLinks);
-            System.out.println("Processing rate in bytes per second: " + processingRateSize);
+
+            if (printStats) {
+                System.out.println("Length of page processed [Bytes]: " + pageContent.length());
+                System.out.println("Total size of pages visited [Bytes]: " + totalSize);
+                System.out.println("Number of links extracted: " + linksExtracted);
+                System.out.println("Number of pages crawled  (" + MAX_PAGES + " pages max): " + pagesVisited.size());
+                System.out.println("URLs available to crawl: " +  pagesToVisit.size());
+                System.out.println("Processing rate in pages per second: " + processingRatePages);
+                System.out.println("Processing rate in links per second: " + processingRateLinks);
+                System.out.println("Processing rate in bytes per second: " + processingRateSize);
+            }
+           
 
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -248,7 +261,7 @@ public class ScratchCrawler {
             System.out.println("Checking if URL is in visited robots.txt: " + url); // Print message
 
         // Extract the domain from the URL
-        String domain = url; // Set the domain to the URL for now
+        String domain; 
         Pattern pattern = Pattern.compile("((http://|https://)?[^:/]+)"); // Create a pattern to match the domain
         Matcher matcher = pattern.matcher(url); // Create a matcher for the pattern
         if (matcher.find()) {
@@ -280,6 +293,11 @@ public class ScratchCrawler {
         // Extract the domain from the URL
         String domain = extractDomain(url); // Set the domain to the URL for now
 
+        // Check if the domain is in the whitelist
+        if (whitelist.contains(domain)) {
+            return true;
+        }
+        
         // Check if the domain is in the visitedRobotsTXTs map
         if (visitedRobotsTXTs.containsKey(domain)) { // If the domain is in the map
             RobotsTXT robotsTXT = visitedRobotsTXTs.get(domain); // Get the RobotsTXT object for the domain
@@ -300,7 +318,7 @@ public class ScratchCrawler {
 
     public static String extractDomain(String url) {
         // Extract the domain from the URL
-        String domain = url; // Set the domain to the URL for now
+        String domain; 
         Pattern pattern = Pattern.compile("((http://|https://)?[^:/]+)"); // Create a pattern to match the domain
         Matcher matcher = pattern.matcher(url); // Create a matcher for the pattern
         if (matcher.find()) {
@@ -326,7 +344,7 @@ public class ScratchCrawler {
             } catch (InterruptedException e) {
                 System.out.println("Error waiting between crawling pages.");
                 e.printStackTrace();
-            } // 
+            } 
         }
 
         System.out.println("Crawling complete."); // Print message
@@ -365,25 +383,54 @@ public class ScratchCrawler {
         ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object
         //crawler.crawl("https://archive.org/details/bostonpubliclibrary"); // Start off the crawl with the seed page
 
-        // Parse command-line arguments
-        if ("--file".equals(args[0]) && args.length == 2) {
-            String filePath = args[1];
-            crawler.readURLsFromFile(filePath);
-            crawler.crawl(); // Start off the crawl with the seed pages
+        boolean startCrawl = false; // Flag to start the crawl
+        String seed = ""; // Seed URL
 
+        // Parse command-line arguments
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--file":
+                    if (i + 1 < args.length) {
+                        String filePath = args[++i];
+                        crawler.readURLsFromFile(filePath);
+                        startCrawl = true;
+                    } else {
+                        System.out.println("Missing file path after --file");
+                    }
+                    break;
+                case "--seed":
+                    if (i + 1 < args.length) {
+                        seed = args[++i];
+                        crawler.pagesToVisit.add(seed);
+                        startCrawl = true;
+                    } else {
+                        System.out.println("Missing seed URL after --seed");
+                    }
+                    break;
+                case "--stats":
+                    printStats = true;
+                    break;
+                case "--social": 
+                    // Extension of our crawler to crawling social media posts of some large network (in this case Tumblr)
+                    crawler.pagesToVisit.add("https://www.tumblr.com/");
+                    startCrawl = true;
+                    break;
+                case "--help":
+                    System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
+                    System.out.println("--file <file_path>: Read URLs from a file and start crawling");
+                    System.out.println("--seed <seed_url>: Start crawling from a seed URL");
+                    System.out.println("--stats: Print statistics during crawling");
+                    System.out.println("--social: Include crawling from the Usenet Archives website");
+                    System.out.println("--help: Display this help message");
+                    break;
+                default:
+                    System.out.println("Invalid argument: " + args[i] + ". Use --help for usage information.");
+                    break;
+            }
         }
-        else if("--seed".equals(args[0]) && args.length == 2) {
-            String seed = args[1];
-            crawler.crawl(seed); // Start off the crawl with the seed page
-        }
-        else if("--help".equals(args[0])) {
-            System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
-            System.out.println("--file <file_path>: Read URLs from a file and start crawling");
-            System.out.println("--seed <seed_url>: Start crawling from a seed URL");
-            System.out.println("--help: Display this help message");
-        }
-        else {
-            System.out.println("Invalid arguments. Use --help for usage information.");
+
+        if (startCrawl) {
+            crawler.crawl(); // Start the crawl
         }
 
     }
