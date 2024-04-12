@@ -30,17 +30,21 @@ public class RegexParser {
         return sentences;
     }
 
-    // Function to extract links from the page
     public static List<String> extractLinks(String text) {
         List<String> links = new ArrayList<>();
         // Regular expression pattern to match URLs
-        String urlPattern = "(https?://\\S+|www\\.\\S+)";
+        String urlPattern = "\\b(https?://|-//|www\\.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]";
         Pattern pattern = Pattern.compile(urlPattern);
         Matcher matcher = pattern.matcher(text);
-
+    
         // Find all matches of URLs in the text
         while (matcher.find()) {
-            links.add(matcher.group());
+            String url = matcher.group();
+            // Trim trailing quotation mark if present
+            if (url.endsWith("\"")) {
+                url = url.substring(0, url.length() - 1);
+            }
+            links.add(url);
         }
         return links;
     }
