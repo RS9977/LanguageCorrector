@@ -5,7 +5,4 @@ CheckerCorrector/*.jar
 CheckerCorrector/test.*
 CheckerCorrector/*.txt
 CheckerCorrector/*db
-CheckerCorrector/corrector
-CheckerCorrector/checker
 !CheckerCorrector/manifest*
-*.java
