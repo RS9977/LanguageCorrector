@@ -20,7 +20,7 @@ The only library used for the checker and corrector is https://github.com/xerial
 To run the webcrawler, run `./crawler --file [PATH]`. Alternatively, `java ScratchCrawler --file [PATH]` also works.
 
 ### Checker/Corrector
-To build the project for CheckerCorrector we are using a make file. running `make dev_corrector` and `make dev_checker` will compile and build the `checker.jar` and `corrector.jar` with the user interface requested, and and script to run them as `./checker --file [PATH]` and `./corrector --file [PATH]`.
+To build the project for CheckerCorrector we are using a make file. running `make dev_corrector` and `make dev_checker` will compile and build the `checker.jar` and `corrector.jar` with the user interface requested. The system should let jar files to run as `./checker.jar` otherwise they can be run using `java -jar checker.jar <command>`.
 
 ## How it Works
 ### Checker
