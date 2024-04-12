@@ -13,21 +13,28 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ScratchCrawler {
     public static final int MAX_PAGES = 100; // Maximum pages to crawl
+
     public static long waitTime = 200; // Time to wait between requests in milliseconds
+    public static int totalSize = 0; // Total size of pages visited in bytes
+    public static double processingRatePages = 0; // Processing rate in pages per second (inverse waitTime)
+    public static double processingRateLinks = 0; // Processing rate in links per second
+    public static double processingRateSize = 0; // Processing rate in bytes per second
+    
 
     // Using a HashSet to store visited pages and pages to visit. This is the best data structure 
     // for this use case because it has O(1) time complexity for add, remove, and contains 
     // operations and enforces uniqueness (we do not want to crawl pages more than once). 
     // Also we do not care about the order of the pages.
-    public Set<String> pagesVisited = new HashSet<String>(); // Set to store visited pages
-    public Set<String> pagesToVisit = new HashSet<String>(); // Set to store pages to visit
-    public Set<String> disallowedDomains = new HashSet<String>(); // Set to store disallowed domains
+    public static Set<String> pagesVisited = new HashSet<String>(); // Set to store visited pages
+    public static Set<String> pagesToVisit = new HashSet<String>(); // Set to store pages to visit
+    public static Set<String> disallowedDomains = new HashSet<String>(); // Set to store disallowed domains
 
     // In order to store the robots.txt restrictions, we are going to use a HashMap with the domain 
     // as the key and an object representing the restrictions as the value. This is the best data
@@ -51,9 +58,11 @@ public class ScratchCrawler {
     }
 
     // https://docs.oracle.com/javase/tutorial/networking/urls/index.html
-    public void getPage(String url) {
+    public static void getPage(String url) {
         // Code to get the page
-        System.out.println("Getting page: " + url); // Print message
+
+        // Provide real-time status and statistics feedback for the crawler
+        System.out.println("Processing URL: " + url); 
 
         if (url.endsWith(")")) {
             url = url.substring(0, url.length() - 1);
@@ -110,7 +119,7 @@ public class ScratchCrawler {
             String line; // Declare a string to store each line of the page
             StringBuilder pageContent = new StringBuilder(); // To store the page content
 
-            
+            int linksExtracted = 0; // Number of links extracted from the page
             while ((line = reader.readLine()) != null && pageContent.length() < 1024) { // While there are lines to read
                 pageContent.append(line); // Add the line to the page content
                 
@@ -119,11 +128,26 @@ public class ScratchCrawler {
                 for (String link : links) { // For each link
                     if (!pagesVisited.contains(link)) { // If the link has not been visited
                         pagesToVisit.add(link); // Add the link to pagesToVisit
+                        linksExtracted++; // Increment the number of links extracted
                     }
                 }
             }
             // Write the page content to the file, up to 1KB
             writer.println(pageContent.toString().substring(0, Math.min(1024, pageContent.length())));      
+
+            // Provide real-time status and statistics feedback for the crawler
+            totalSize += pageContent.length();
+            System.out.println("Length of page processed [Bytes]: " + pageContent.length());
+            System.out.println("Total size of pages visited [Bytes]: " + totalSize);
+            System.out.println("Number of links extracted: " + linksExtracted);
+            System.out.println("Number of pages crawled  (" + MAX_PAGES + " pages max): " + pagesVisited.size());
+            System.out.println("URLs available to crawl: " +  pagesToVisit.size());
+            processingRatePages = 1000 / (double)waitTime; // Processing rate in pages per second (inverse waitTime)
+            processingRateLinks = linksExtracted * processingRatePages; // Processing rate in links per second
+            processingRateSize = pageContent.length() * processingRatePages; // Processing rate in bytes per second
+            System.out.println("Processing rate in pages per second: " + processingRatePages);
+            System.out.println("Processing rate in links per second: " + processingRateLinks);
+            System.out.println("Processing rate in bytes per second: " + processingRateSize);
 
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -337,11 +361,22 @@ public class ScratchCrawler {
         //crawler.crawl("https://archive.org/details/bostonpubliclibrary"); // Start off the crawl with the seed page
 
         // Parse command-line arguments
-        for (int i = 0; i < args.length; i++) {
-            if ("--file".equals(args[i]) && i + 1 < args.length) {
-                String filePath = args[i + 1];
-                crawler.readURLsFromFile(filePath);
-            }
+        if ("--file".equals(args[0]) && args.length == 2) {
+            String filePath = args[1];
+            crawler.readURLsFromFile(filePath);
+        }
+        else if("--seed".equals(args[0]) && args.length == 2) {
+            String seed = args[1];
+            crawler.crawl(seed);
+        }
+        else if("--help".equals(args[0])) {
+            System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
+            System.out.println("--file <file_path>: Read URLs from a file and start crawling");
+            System.out.println("--seed <seed_url>: Start crawling from a seed URL");
+            System.out.println("--help: Display this help message");
+        }
+        else {
+            System.out.println("Invalid arguments. Use --help for usage information.");
         }
 
         crawler.crawl(); // Start off the crawl with the seed pages
