@@ -6,3 +6,5 @@ CheckerCorrector/test.*
 CheckerCorrector/*.txt
 CheckerCorrector/*db
 !CheckerCorrector/manifest*
+Crawler/target/classes/ScratchCrawler.class
+Crawler/target/classes/crawledData.txt

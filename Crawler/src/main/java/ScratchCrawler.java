@@ -64,9 +64,10 @@ public class ScratchCrawler {
         // Provide real-time status and statistics feedback for the crawler
         System.out.println("Processing URL: " + url); 
 
-        if (url.endsWith(")")) {
-            url = url.substring(0, url.length() - 1);
-        }
+        // REMOVE ME - fixing RegexParser.extractLinks() to handle URLs ending with ')'
+        // if (url.endsWith(")")) {
+        //     url = url.substring(0, url.length() - 1);
+        // }
         
         try {
             URL pageURL = new URL(url); // Create a new URL object
@@ -228,9 +229,13 @@ public class ScratchCrawler {
             e.printStackTrace();
             return; // Exit the method
         } catch (IOException e) {
-            System.out.println("Error fetching robots.txt file.");
-            e.printStackTrace();
-            return; // Exit the method
+            if (Debug.DEBUG_RobotsTXT) {
+                System.out.println("Error fetching robots.txt file.");
+                e.printStackTrace();
+            }
+            
+            // If the robots.txt file is not found, add the domain to the disallowedDomains set
+            disallowedDomains.add(domain);
         }
 
         // Store the RobotsTXT object in the visitedRobotsTXTs map
@@ -364,10 +369,12 @@ public class ScratchCrawler {
         if ("--file".equals(args[0]) && args.length == 2) {
             String filePath = args[1];
             crawler.readURLsFromFile(filePath);
+            crawler.crawl(); // Start off the crawl with the seed pages
+
         }
         else if("--seed".equals(args[0]) && args.length == 2) {
             String seed = args[1];
-            crawler.crawl(seed);
+            crawler.crawl(seed); // Start off the crawl with the seed page
         }
         else if("--help".equals(args[0])) {
             System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
@@ -379,6 +386,5 @@ public class ScratchCrawler {
             System.out.println("Invalid arguments. Use --help for usage information.");
         }
 
-        crawler.crawl(); // Start off the crawl with the seed pages
     }
 }
