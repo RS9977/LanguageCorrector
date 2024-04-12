@@ -415,6 +415,11 @@ public class ScratchCrawler {
                     crawler.pagesToVisit.add("https://www.tumblr.com/");
                     startCrawl = true;
                     break;
+                case "--dutch":
+                    // Extension of our crawler with an English to Dutch translation
+                    crawler.pagesToVisit.add("https://travelwithlanguages.com/blog/most-common-dutch-words.html");
+                    startCrawl = true;
+                    break;
                 case "--help":
                     System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
                     System.out.println("--file <file_path>: Read URLs from a file and start crawling");
