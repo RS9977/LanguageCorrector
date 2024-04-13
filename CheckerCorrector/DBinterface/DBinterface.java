@@ -215,4 +215,121 @@ public class DBinterface {
         }
         return new String();
     }
+
+    public void updateTokenInDatabase(String sentence, DirectedGraph<State> graph){
+        StateMachine SM = new StateMachine();
+        sentence = sentence.replaceAll("\\p{Punct}", " $0");
+        String[] tokens = sentence.split("\\s+");
+        String[] tokensCopy = tokens.clone();
+        List<Boolean> missFlag = new ArrayList();
+        List<String> tokenList = new ArrayList<>(Arrays.asList(tokensCopy));
+        String url       = "jdbc:sqlite:./SQLite/mydatabase.db";
+        String urlinsert = "jdbc:sqlite:./SQLite/newdatabase.db";
+        String dicFileName = "./SQLite/smallDic.txt";
+        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        int initialConf = 0;
+        int cntMiss = 0;
+        try (Connection connection = DriverManager.getConnection(url)) {
+
+            // Lookup each token in the database and categorize it
+            for (int i = 0; i < tokens.length; i++) {
+                String token = tokens[i];
+                System.out.print("\nBefor token: "+tokens[i]+"| ");
+                try (Statement statement = connection.createStatement()) {
+                    
+                    String query = "SELECT role FROM word_roles WHERE word = '" + token + "';";
+                    String role = new String();
+                    
+                    ResultSet resultSet = statement.executeQuery(query);
+                    if (resultSet.next()) {
+                        role = resultSet.getString("role");
+                        //////System.out.print("first try: " + token + " -> " + role);
+                        System.out.println("role: " + role);
+                        if(!role.equals("NAN")){
+                            tokens[i] = role;
+                            missFlag.add(false);
+                        }else{
+                            missFlag.add(true);
+                            cntMiss ++;
+                        }
+                    }else{
+                        String tokenCorrected = new String();
+                        if(role.isEmpty()){
+                            tokenCorrected = typoChecker.closestWord(token);
+                            if(!tokenCorrected.equals(token))
+                                initialConf += 5;
+                           // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+
+                            query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                            // Replace the token with its role
+                            resultSet = statement.executeQuery(query);
+                            if (resultSet.next()) {
+                                tokenList.set(i,tokenCorrected);
+                                role = resultSet.getString("role");
+                               //  ////System.out.print("| Second try: "+ token + " -> " + role);
+                                System.out.println("role: " + role);
+                                if(!role.equals("NAN")){
+                                    tokens[i] = role;
+                                    missFlag.add(false);
+                                }else{
+                                    missFlag.add(true);
+                                    cntMiss ++;
+                                }
+                            }else{
+                                missFlag.add(true);
+                                cntMiss ++;
+                            }
+                        }
+
+                    } 
+                    }
+                    System.out.print("After token: "+tokens[i]+"| ");
+                    //////System.out.println();
+            }
+            System.out.println("\nMISS: "+cntMiss);
+            if(cntMiss<3 && cntMiss>0){
+                List<State> actions = new ArrayList<>();
+
+                for(String token: tokens){
+                    actions.add(State.fromString(token));
+                }
+                // Define the initial state
+                State initialState = State.START;
+                
+                // Check if the sequence of actions follows the state machine
+                List<State> suggested = SM.updateDB(graph, actions, initialState);
+                System.out.println(actions);
+                System.out.println(suggested);
+                System.out.println("---------------------------");
+                int cntUp=0;
+                for(int i=0; i<suggested.size(); i++){
+                    if(!suggested.get(i).toString().equals(tokens[i]))
+                        cntUp++;
+                }
+                System.out.println(missFlag);
+                if(cntUp<3){
+                    for(int i=0; i<tokens.length; i++){
+                        if(missFlag.get(i)){
+                            if(!suggested.get(i).toString().equals(tokens[i])){
+                                System.out.println(tokens[i] + "| " + suggested.get(i));
+                                String sql = "INSERT INTO word_roles VALUES(?, ?);";
+                                try (Connection conn = DriverManager.getConnection(urlinsert);
+                                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                                    // Insert the first record
+                                    pstmt.setString(1, tokens[i]);
+                                    pstmt.setString(2, suggested.get(i).toString());
+                                    pstmt.executeUpdate();
+                                    
+                                } catch (SQLException e) {
+                                    System.out.println(e.getMessage());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

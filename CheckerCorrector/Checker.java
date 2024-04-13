@@ -21,7 +21,25 @@ public class Checker {
         DBinterface dbInterface = new DBinterface();
         DirectedGraph<State> graph = basicGraphClass.getGraph();
         JsonMaker jsonMaker = JsonMaker.create();
-        if(argPars.isUpdateHashTable()){
+        if(argPars.isUpdateToken()){
+            if(argPars.isCheckFile()){
+                SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
+                List<String> extractedSentences = extractor.getSentences();  
+                for (String sentence : extractedSentences) {
+                    dbInterface.updateTokenInDatabase(sentence.toLowerCase(), graph);
+                    PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 3, 5);
+                    List<String> phrases = extractorPhrase.getPhrases();
+                    for (String phrase : phrases) {
+                        dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);
+                    }                        
+                }
+            }else if(argPars.isCheckSentence()){
+                dbInterface.updateTokenInDatabase(argPars.getSentence().toLowerCase(), graph);
+                for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),3, 5).getPhrases()) {
+                    //dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
+                }
+            }
+        }else if(argPars.isUpdateHashTable()){
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
                 List<String> extractedSentences = extractor.getSentences();  

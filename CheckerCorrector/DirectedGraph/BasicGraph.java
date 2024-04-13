@@ -53,6 +53,7 @@ public class BasicGraph {
         graph.addEdge(State.NOT,       State.ADVERB);
         graph.addEdge(State.NOT,       State.ADJECTIVE);
         graph.addEdge(State.NOT,       State.ARTICLE);
+        graph.addEdge(State.NOT,       State.DOT);
         graph.addEdge(State.OF,        State.NOUN);
         graph.addEdge(State.NOUN,      State.OF);
         graph.addEdge(State.NOUN,      State.IS);
@@ -60,6 +61,7 @@ public class BasicGraph {
         graph.addEdge(State.IS,        State.ADJECTIVE);
         graph.addEdge(State.IS,        State.ADVERB);
         graph.addEdge(State.IS,        State.ARTICLE);
+        graph.addEdge(State.IS,        State.NOT);
         graph.addEdge(State.THAT,      State.IF);
 
 
