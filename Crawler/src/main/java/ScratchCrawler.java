@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Iterator;
@@ -20,7 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ScratchCrawler {
-    public static final int MAX_PAGES = 100; // Maximum pages to crawl
+    public static int MAX_PAGES = 100; // Maximum pages to crawl
+    public static int TIMEOUT = 30; // Timeout for each page in seconds
 
     public static long waitTime = 200; // Time to wait between requests in milliseconds
     public static int totalSize = 0; // Total size of pages visited in bytes
@@ -28,7 +32,7 @@ public class ScratchCrawler {
     public static double processingRateLinks = 0; // Processing rate in links per second
     public static double processingRateSize = 0; // Processing rate in bytes per second
     public static boolean printStats = false; // Print stats flag
-    
+    public static int max_storage = 1000; // Maximum storage size per page in bytes
 
     // Using a HashSet to store visited pages and pages to visit. This is the best data structure 
     // for this use case because it has O(1) time complexity for add, remove, and contains 
@@ -58,7 +62,7 @@ public class ScratchCrawler {
             pagesToVisit.remove(nextPage); // Remove the page from pagesToVisit
             pagesVisited.add(nextPage); // Add the page to pagesVisited
         } else {
-            System.out.println("No more pages to visit."); // Print message
+            if (printStats) System.out.println("No more pages to visit."); // Print message
         }
 
         return nextPage; // Return the next page
@@ -88,7 +92,7 @@ public class ScratchCrawler {
             int responseCode = connection.getResponseCode();
 
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                System.out.println("Error reading page. Response code: " + responseCode);
+                if (printStats) System.out.println("Error reading page. Response code: " + responseCode);
 
                 // If the page is not found, add the domain to the disallowedDomains set
                 disallowedDomains.add(domain);
@@ -103,7 +107,7 @@ public class ScratchCrawler {
             if (isInVisitedRobotsTxt(domain)) { // If the URL is in the visited robots.txt
                 RobotsTXT robotsTXT = visitedRobotsTXTs.get(domain); // Get the RobotsTXT object for the URL
                 if (robotsTXT.getDisallowedPaths().contains(url) || disallowedDomains.contains(domain)) { // If the URL is disallowed
-                    System.out.println("URL is disallowed"); // Print message
+                    if(printStats) System.out.println("URL is disallowed"); // Print message
                     return; // Exit the method
                 } else {
                     // URL is allowed
@@ -130,7 +134,7 @@ public class ScratchCrawler {
             StringBuilder pageContent = new StringBuilder(); // To store the page content
 
             int linksExtracted = 0; // Number of links extracted from the page
-            while ((line = reader.readLine()) != null && pageContent.length() < 1024) { // While there are lines to read
+            while ((line = reader.readLine()) != null && pageContent.length() < max_storage) { // While there are lines to read
                 pageContent.append(line); // Add the line to the page content
                 
                 // Extract links from the page
@@ -142,8 +146,8 @@ public class ScratchCrawler {
                     }
                 }
             }
-            // Write the page content to the file, up to 1KB
-            writer.println(pageContent.toString().substring(0, Math.min(1024, pageContent.length())));      
+            // Write the page content to the file, up to storage limit
+            writer.println(pageContent.toString().substring(0, Math.min(max_storage, pageContent.length())));      
 
             // Provide real-time status and statistics feedback for the crawler
             totalSize += pageContent.length();
@@ -167,12 +171,16 @@ public class ScratchCrawler {
             reader.close(); // Close the reader
 
         } catch (MalformedURLException e) {
-            System.out.println("Error creating URL object.");
-            e.printStackTrace();
+            if(printStats) {
+                System.out.println("Error creating URL object.");
+                e.printStackTrace();
+            }
             return; // Exit the method
         } catch (IOException e) {
-            System.out.println("Error reading page.");
-            e.printStackTrace();
+            if(printStats) {
+                System.out.println("Error reading page.");
+                e.printStackTrace();
+            }
             return; // Exit the method
         } 
 
@@ -238,8 +246,10 @@ public class ScratchCrawler {
 
             reader.close(); // Close the reader
         } catch (MalformedURLException e) {
-            System.out.println("Error creating URL object for robots.txt file.");
-            e.printStackTrace();
+            if(printStats) {
+                System.out.println("Error creating URL object for robots.txt file.");
+                e.printStackTrace();
+            }
             return; // Exit the method
         } catch (IOException e) {
             if (Debug.DEBUG_RobotsTXT) {
@@ -269,7 +279,7 @@ public class ScratchCrawler {
             if (Debug.DEBUG)
                 System.out.println("Domain: " + domain); // Print the domain
         } else {
-            System.out.println("Error extracting domain from URL.");
+            if (printStats) System.out.println("Error extracting domain from URL.");
             return false; // Exit the method
         }
 
@@ -326,39 +336,51 @@ public class ScratchCrawler {
             if (Debug.DEBUG)
                 System.out.println("Domain: " + domain); // Print the domain
         } else {
-            System.out.println("Error extracting domain from URL.");
+            if (printStats) System.out.println("Error extracting domain from URL.");
             return url; // Exit the method
         }
 
         return domain; // Return the domain
     }
 
-    public void crawl(String seed) {
-        pagesToVisit.add(seed); // Add the seed page to pagesToVisit
+    // Unused in this version of the crawler
+    // public void crawl(String seed) {
+    //     pagesToVisit.add(seed); // Add the seed page to pagesToVisit
 
-        while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
-            String nextPage = getNextPage(); // Get the next page
-            try {
-                Thread.sleep(waitTime); // Wait to be polite
-                getPage(nextPage); // Get the page
-            } catch (InterruptedException e) {
-                System.out.println("Error waiting between crawling pages.");
-                e.printStackTrace();
-            } 
-        }
+    //     while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
+    //         String nextPage = getNextPage(); // Get the next page
+    //         try {
+    //             Thread.sleep(waitTime); // Wait to be polite
+    //             getPage(nextPage); // Get the page
+    //         } catch (InterruptedException e) {
+    //             System.out.println("Error waiting between crawling pages.");
+    //             e.printStackTrace();
+    //         } 
+    //     }
 
-        System.out.println("Crawling complete."); // Print message
-    }
+    //     System.out.println("Crawling complete."); // Print message
+    // }
     public void crawl() {
         while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
             String nextPage = getNextPage(); // Get the next page
+            
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> future = executor.submit(() -> {
+                try {
+                    Thread.sleep(waitTime); // Wait to be polite
+                    getPage(nextPage); // Get the page
+                } catch (InterruptedException e) {
+                    System.out.println("Error waiting between crawling pages.");
+                    e.printStackTrace();
+                }
+            });
             try {
-                Thread.sleep(waitTime); // Wait to be polite
-                getPage(nextPage); // Get the page
-            } catch (InterruptedException e) {
-                System.out.println("Error waiting between crawling pages.");
-                e.printStackTrace();
-            } // 
+                future.get(TIMEOUT, java.util.concurrent.TimeUnit.SECONDS); // Set a timeout of 30 seconds for each page
+            } catch (Exception e) {
+                future.cancel(true); // Cancel the future
+                if (printStats) System.out.println("Page read timed out. Read took longer than " + TIMEOUT + " seconds.");
+            }
+            executor.shutdownNow();
         }
 
         System.out.println("Crawling complete."); // Print message
@@ -407,6 +429,20 @@ public class ScratchCrawler {
                         System.out.println("Missing seed URL after --seed");
                     }
                     break;
+                case "--mp":
+                    if (i + 1 < args.length) {
+                        MAX_PAGES = Integer.parseInt(args[++i]);
+                    } else {
+                        System.out.println("Missing number of pages after --mp");
+                    }
+                    break;
+                case "--timeout":
+                    if (i + 1 < args.length) {
+                        TIMEOUT = Integer.parseInt(args[++i]);
+                    } else {
+                        System.out.println("Missing timeout value after --timeout");
+                    }
+                    break;
                 case "--stats":
                     printStats = true;
                     break;
@@ -415,12 +451,25 @@ public class ScratchCrawler {
                     crawler.pagesToVisit.add("https://www.tumblr.com/");
                     startCrawl = true;
                     break;
+                case "--dutch":
+                    // Extension of our crawler with an English to Dutch translation
+                    crawler.pagesToVisit.add("https://travelwithlanguages.com/blog/most-common-dutch-words.html");
+                    startCrawl = true;
+                    break;
+                case "--xl":
+                    // Allows our crawler to save 1 MB of data per page instead of 1 KB
+                    max_storage = 1000000; // 1 million bytes (1 MB)
+                    break;
                 case "--help":
                     System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
                     System.out.println("--file <file_path>: Read URLs from a file and start crawling");
                     System.out.println("--seed <seed_url>: Start crawling from a seed URL");
+                    System.out.println("--mp <number>: Set the maximum number of pages to crawl");
+                    System.out.println("--timeout <seconds>: Set the timeout for each page in seconds");
                     System.out.println("--stats: Print statistics during crawling");
-                    System.out.println("--social: Include crawling from the Usenet Archives website");
+                    System.out.println("--social: Include crawling from Tumblr social media platform");
+                    System.out.println("--dutch: Include crawling from Dutch translation website");
+                    System.out.println("--xl: Increase the storage size per page to 1 MB");
                     System.out.println("--help: Display this help message");
                     break;
                 default:
@@ -431,6 +480,9 @@ public class ScratchCrawler {
 
         if (startCrawl) {
             crawler.crawl(); // Start the crawl
+        } 
+        else {
+            System.out.println("No seed URL(s) provided. Use --help for usage information.");
         }
 
     }
