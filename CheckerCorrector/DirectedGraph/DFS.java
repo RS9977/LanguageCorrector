@@ -19,14 +19,14 @@ public class DFS {
         return new DFS();
     }
 
-    public Set<String> dfs(DirectedGraph<State> graph, State currentState, int maxDepth, int minDepth){
+    public Set<String> dfs(DirectedGraph<State> graph, State currentState, State end, int maxDepth, int minDepth){
         List<State> path = new ArrayList<>();
         path.add(currentState);
-        dfsRecurssion(graph, currentState, 0, maxDepth, path, minDepth);
+        dfsRecurssion(graph, currentState, end, 0, maxDepth, path, minDepth);
         return allPaths;
     }
-    private void dfsRecurssion(DirectedGraph<State> graph, State currentState, int depth, int maxDepth, List<State> path, int minDepth) {
-        if ((currentState == State.DOT)) {
+    private void dfsRecurssion(DirectedGraph<State> graph, State currentState, State end, int depth, int maxDepth, List<State> path, int minDepth) {
+        if ((currentState == end)) {
             ListToString lTS =  ListToString.of();
             StringBuilder sb = new StringBuilder();
             int cnt=0;
@@ -34,8 +34,10 @@ public class DFS {
                 lTS.addString(p);
                 cnt++;
             }
-            if(cnt>(maxDepth-minDepth))
+            
+            if(cnt>(maxDepth-minDepth)){
                 allPaths.add(lTS.getString());
+            }
             return;
         }else if(depth >= maxDepth){
             return;
@@ -43,7 +45,7 @@ public class DFS {
         List<State> transitions = graph.getAdjacentNodes(currentState);
         for (State nextState : transitions) {
             path.add(nextState);
-            dfsRecurssion(graph, nextState, depth + 1, maxDepth, path, minDepth);
+            dfsRecurssion(graph, nextState, end, depth + 1, maxDepth, path, minDepth);
             path.remove(path.size() - 1);
         }
     }

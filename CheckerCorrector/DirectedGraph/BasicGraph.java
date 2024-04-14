@@ -55,6 +55,7 @@ public class BasicGraph {
         graph.addEdge(State.NOT,       State.ARTICLE);
         graph.addEdge(State.NOT,       State.DOT);
         graph.addEdge(State.OF,        State.NOUN);
+        graph.addEdge(State.OF,        State.PRONOUN);
         graph.addEdge(State.NOUN,      State.OF);
         graph.addEdge(State.NOUN,      State.IS);
         graph.addEdge(State.PRONOUN,   State.IS);

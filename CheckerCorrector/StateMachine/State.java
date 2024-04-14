@@ -68,5 +68,11 @@ public enum  State {
                 throw new IllegalArgumentException("Character is not in range 'a' to 'z'");
             }
         }
+
+        public static boolean validSuggestedState(State S){
+            if(S == State.VERB || S == State.NOUN || S == State.ADVERB || S == State.CAN || S == State.CONJ || S == State.THAT || S == State.ADJECTIVE)
+                return true;
+            return false;
+        }
         
 }

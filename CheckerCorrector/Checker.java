@@ -34,9 +34,9 @@ public class Checker {
                     }                        
                 }
             }else if(argPars.isCheckSentence()){
-                dbInterface.updateTokenInDatabase(argPars.getSentence().toLowerCase(), graph);
+                //dbInterface.updateTokenInDatabase(argPars.getSentence().toLowerCase(), graph);
                 for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),3, 5).getPhrases()) {
-                    //dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
+                    dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
                 }
             }
         }else if(argPars.isUpdateHashTable()){
