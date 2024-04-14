@@ -2,6 +2,7 @@ package DBinterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import DirectedGraph.DirectedGraph;
@@ -231,66 +232,42 @@ public class DBinterface {
         List<Boolean> missFlag = new ArrayList();
         List<String> tokenList = new ArrayList<>(Arrays.asList(tokensCopy));
         //String url       = "jdbc:sqlite:./SQLite/mydatabase.db";
-        String urlinsert = "jdbc:sqlite:./SQLite/newdatabase.db";
+        //String urlinsert = "jdbc:sqlite:./SQLite/newdatabase.db";
         String dicFileName = "./SQLite/smallDic.txt";
-        String url = "jdbc:sqlite:./SQLite/newdatabase.db";
+        //String url = "jdbc:sqlite:./SQLite/newdatabase.db";
         TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
         int initialConf = 0;
         int cntMiss = 0;
-        try (Connection connection = DriverManager.getConnection(url)) {
-
             // Lookup each token in the database and categorize it
             for (int i = 0; i < tokens.length; i++) {
                 String token = tokens[i];
-            //    System.out.print("\nBefor token: "+tokens[i]+"| ");
-                try (Statement statement = connection.createStatement()) {
-                    
-                    String query = "SELECT role FROM word_roles WHERE word = '" + token + "';";
-                    String role = new String();
-                    
-                    ResultSet resultSet = statement.executeQuery(query);
-                    if (resultSet.next()) {
-                        role = resultSet.getString("role");
+                String role;
+            //    System.out.print("\nBefor token: "+tokens[i]+"| ");                    
+                if (wordRolesMap.containsKey(token)) {
+                    role = wordRolesMap.get(token);
                         //////System.out.print("first try: " + token + " -> " + role);
                     //    System.out.println("role: " + role);
-                        if(!role.equals("NAN")){
+                    tokens[i] = role;
+                    missFlag.add(false);
+                }else{
+                    String tokenCorrected = new String();
+                        tokenCorrected = typoChecker.closestWord(token);
+                        if(!tokenCorrected.equals(token))
+                            initialConf += 5;
+                           // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+
+                        if (wordRolesMap.containsKey(tokenCorrected)) {
+                            tokenList.set(i,tokenCorrected);
+                            role = wordRolesMap.get(tokenCorrected);
+                               //  ////System.out.print("| Second try: "+ token + " -> " + role);
+                              //  System.out.println("role: " + role);
                             tokens[i] = role;
                             missFlag.add(false);
                         }else{
                             missFlag.add(true);
                             cntMiss ++;
                         }
-                    }else{
-                        String tokenCorrected = new String();
-                        if(role.isEmpty()){
-                            tokenCorrected = typoChecker.closestWord(token);
-                            if(!tokenCorrected.equals(token))
-                                initialConf += 5;
-                           // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
-
-                            query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
-                            // Replace the token with its role
-                            resultSet = statement.executeQuery(query);
-                            if (resultSet.next()) {
-                                tokenList.set(i,tokenCorrected);
-                                role = resultSet.getString("role");
-                               //  ////System.out.print("| Second try: "+ token + " -> " + role);
-                              //  System.out.println("role: " + role);
-                                if(!role.equals("NAN")){
-                                    tokens[i] = role;
-                                    missFlag.add(false);
-                                }else{
-                                    missFlag.add(true);
-                                    cntMiss ++;
-                                }
-                            }else{
-                                missFlag.add(true);
-                                cntMiss ++;
-                            }
-                        }
-
-                    } 
-                    }
+                }
                     //System.out.print("After token: "+tokens[i]+"| ");
                     //////System.out.println();
             }
@@ -326,34 +303,21 @@ public class DBinterface {
                                 System.out.println(missFlag);
                                 System.out.println(tokens[i] + "-> " + suggested.get(i));
                                 System.out.println("--------------------------------");
-                                String sql = "INSERT INTO word_roles VALUES(?, ?);";
-                                try (Connection conn = DriverManager.getConnection(urlinsert);
-                                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                                    // Insert the first record
-                                    pstmt.setString(1, tokens[i]);
-                                    pstmt.setString(2, suggested.get(i).toString());
-                                    pstmt.executeUpdate();
-                                    
-                                } catch (SQLException e) {
-                                    System.out.println(e.getMessage());
-                                }
+                                wordRolesMap.put(tokens[i], suggested.get(i).toString()); 
                             }
                         }
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
 
     private HashMap<String, String> wordRolesMap;
 
     // Method to read data from SQLite database into HashMap
-    public void readDataFromDatabase(String dbUrl) {
+    public void readDataFromDatabase() {
         wordRolesMap = new HashMap<>();
-
+        String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
         try (Connection connection = DriverManager.getConnection(dbUrl)) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM word_roles");
@@ -370,7 +334,8 @@ public class DBinterface {
     }
 
     // Method to update SQLite database with updated HashMap
-    public void updateDatabase(String dbUrl) {
+    public void updateDatabase() {
+        String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
         try (Connection connection = DriverManager.getConnection(dbUrl)) {
             // Clear existing data in the table
             Statement clearStatement = connection.createStatement();

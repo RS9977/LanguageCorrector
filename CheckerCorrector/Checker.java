@@ -22,6 +22,7 @@ public class Checker {
         DirectedGraph<State> graph = basicGraphClass.getGraph();
         JsonMaker jsonMaker = JsonMaker.create();
         if(argPars.isUpdateToken()){
+            dbInterface.readDataFromDatabase();
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
                 List<String> extractedSentences = extractor.getSentences();  
@@ -39,6 +40,7 @@ public class Checker {
                     dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
                 }
             }
+            dbInterface.updateDatabase();
         }else if(argPars.isUpdateHashTable()){
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());

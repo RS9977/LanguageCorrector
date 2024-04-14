@@ -18,6 +18,7 @@ public enum  State {
         OF,
         CAN,
         NOT,
+        PREPOS,
         DOES,
         NAN;   // State for processing a noun
 

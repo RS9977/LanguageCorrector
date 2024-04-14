@@ -64,6 +64,9 @@ public class BasicGraph {
         graph.addEdge(State.IS,        State.ARTICLE);
         graph.addEdge(State.IS,        State.NOT);
         graph.addEdge(State.THAT,      State.IF);
+        graph.addEdge(State.VERB,      State.PREPOS);
+        graph.addEdge(State.IS,      State.PREPOS);
+        graph.addEdge(State.PREPOS,      State.NOUN);
 
 
     }
