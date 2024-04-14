@@ -273,7 +273,7 @@ public class DBinterface {
             }
             
             //System.out.println("\nMISS: "+cntMiss);
-            if(cntMiss<3 && cntMiss>0 && !missFlag.getLast()){
+            if(cntMiss<3 && cntMiss>0 && !missFlag.get(missFlag.size()-1)){
                 List<State> actions = new ArrayList<>();
 
                 for(String token: tokens){

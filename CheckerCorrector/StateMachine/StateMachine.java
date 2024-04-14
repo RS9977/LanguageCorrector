@@ -96,7 +96,7 @@ public class StateMachine{
         }else{
             Set<String> allPaths = new HashSet<>();
             DFS dfs = DFS.of();
-            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.getLast(), actions.size()-1, 0));
+            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.get(actions.size()-1), actions.size()-1, 0));
             StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
             for(String path: allPaths)
                 sfw.appendString(path);
