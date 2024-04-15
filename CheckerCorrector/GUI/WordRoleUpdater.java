@@ -21,18 +21,20 @@ public class WordRoleUpdater extends JFrame {
     private JLabel progressLabel;
     private JLabel wordLabel;
     private JLabel roleLabel;
+    private JLabel currentWordStatusLabel;
     private JButton acceptButton;
     private JButton rejectButton;
     private JButton acceptAllButton;
     private JButton rejectAllButton;
+    private JButton backButton;
+    private JButton nextButton;
 
     public WordRoleUpdater() {
         try {
             connection = DriverManager.getConnection(DB_URL);
             loadWordRoles();
             initializeUI();
-            updateWordLabel(); // Show the first word and its role
-            updateRoleLabel();
+            updateLabels();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -49,7 +51,7 @@ public class WordRoleUpdater extends JFrame {
             String word = resultSet.getString("word");
             String role = resultSet.getString("role");
             wordRoles.put(word, role);
-            changes.put(word, false);
+            changes.put(word, true);
         }
 
         statement.close();
@@ -58,35 +60,42 @@ public class WordRoleUpdater extends JFrame {
     private void initializeUI() {
         setTitle("Word Role Updater");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
 
         progressLabel = new JLabel();
         progressLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        updateProgressLabel();
 
         wordLabel = new JLabel();
         wordLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        updateWordLabel();
 
         roleLabel = new JLabel();
         roleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        updateRoleLabel();
 
-        JPanel labelPanel = new JPanel(new GridLayout(3, 1));
+        currentWordStatusLabel = new JLabel();
+        currentWordStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+       // updateCurrentStatus();
+
+       updateLabels();
+        JPanel labelPanel = new JPanel(new GridLayout(4, 1));
         labelPanel.add(progressLabel);
         labelPanel.add(wordLabel);
         labelPanel.add(roleLabel);
+        labelPanel.add(currentWordStatusLabel);
 
         acceptButton = new JButton("Accept");
         rejectButton = new JButton("Reject");
         acceptAllButton = new JButton("Accept All");
         rejectAllButton = new JButton("Reject All");
+        backButton = new JButton("Back");
+        nextButton = new JButton("Next");
 
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 2));
+        JPanel buttonPanel = new JPanel(new GridLayout(3, 2));
         buttonPanel.add(acceptButton);
         buttonPanel.add(rejectButton);
         buttonPanel.add(acceptAllButton);
         buttonPanel.add(rejectAllButton);
+        buttonPanel.add(backButton);
+        buttonPanel.add(nextButton);
+
 
         acceptButton.addActionListener(new ActionListener() {
             @Override
@@ -96,9 +105,24 @@ public class WordRoleUpdater extends JFrame {
             }
         });
 
+        nextButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goNext();
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goBack();
+            }
+        });
+
         rejectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                changes.put(getCurrentWord(), false);
                 //wordRoles.remove(getCurrentWord()); // Remove the current word
                 //changes.remove(getCurrentWord()); // Remove the change for the current word
                 updateNextWord(); // Move to the next word
@@ -108,10 +132,6 @@ public class WordRoleUpdater extends JFrame {
         acceptAllButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (String word : wordRoles.keySet()) {
-                    changes.put(word, true);
-                }
-                updateDatabase(); // Update database before ending
                 JOptionPane.showMessageDialog(WordRoleUpdater.this, "All changes accepted. Database updated.");
                 System.exit(0);
             }
@@ -144,6 +164,23 @@ public class WordRoleUpdater extends JFrame {
         return (String) wordRoles.keySet().toArray()[currentIndex];
     }
 
+    private void goBack(){
+        if(currentIndex>0){
+            currentIndex--;
+            updateLabels();
+        }else
+            JOptionPane.showMessageDialog(this, "Can not go back further");
+    }
+
+    private void goNext(){
+        if (currentIndex < wordRoles.size()-1) {
+            currentIndex++;
+            updateLabels();
+        } else {
+            JOptionPane.showMessageDialog(this, "Can not go next further");
+        }
+    }
+
     private void updateNextWord() {
         currentIndex++;
         if (currentIndex >= wordRoles.size()) {
@@ -151,12 +188,23 @@ public class WordRoleUpdater extends JFrame {
             JOptionPane.showMessageDialog(this, "No more changes to review.");
             System.exit(0);
         } else {
-            updateWordLabel();
-            updateRoleLabel(); 
-            updateProgressLabel();
+            updateLabels();
         }
     }
 
+    private void updateLabels(){
+        progressLabel.setText((currentIndex + 1) + "/" + wordRoles.size());
+
+        String word = getCurrentWord();
+        wordLabel.setText("Word: " + word);
+
+        String role = wordRoles.get(word);
+        roleLabel.setText("Role: " + role);
+
+        currentWordStatusLabel.setText("To be cleared? " + ((changes.get(word)? "No!": "Yes!")));
+    }
+
+    /*
     private void updateProgressLabel() {
         progressLabel.setText((currentIndex + 1) + "/" + wordRoles.size());
     }
@@ -172,6 +220,11 @@ public class WordRoleUpdater extends JFrame {
         roleLabel.setText("Role: " + role);
     }
 
+   // private void updateCurrentStatus() {
+  //      String word = getCurrentWord();
+  //      currentWordStatusLabel.setText("To be cleared? " + ((changes.get(word)? "No!": "Yes!")));
+  //  }
+    */
     private void updateDatabase() {
         try {
             Statement statement = connection.createStatement();
