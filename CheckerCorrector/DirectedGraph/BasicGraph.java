@@ -37,14 +37,15 @@ public class BasicGraph {
         //graph.addEdge(State.COMMA,     State.PRONOUN);
         graph.addEdge(State.COMMA,     State.CONJ);
         graph.addEdge(State.CONJ,      State.PRONOUN);
-        graph.addEdge(State.PRONOUN,   State.CAN);
-        graph.addEdge(State.CAN,       State.VERB);
+        graph.addEdge(State.PRONOUN,   State.MODAL);
+        graph.addEdge(State.NOUN,   State.MODAL);
+        graph.addEdge(State.MODAL,       State.VERB);
         graph.addEdge(State.IF,        State.PRONOUN);
         graph.addEdge(State.THAT,      State.PRONOUN);
         graph.addEdge(State.IF,        State.NOUN);
         graph.addEdge(State.THAT,      State.NOUN);
         graph.addEdge(State.NOUN,      State.VERB);
-        graph.addEdge(State.NOUN,      State.CAN);
+        graph.addEdge(State.NOUN,      State.MODAL);
         //graph.addEdge(State.VERB,      State.NOT);
         graph.addEdge(State.PRONOUN,   State.DOES);
         graph.addEdge(State.NOUN,      State.DOES);
@@ -54,9 +55,7 @@ public class BasicGraph {
         graph.addEdge(State.NOT,       State.ADJECTIVE);
         graph.addEdge(State.NOT,       State.ARTICLE);
         graph.addEdge(State.NOT,       State.DOT);
-        graph.addEdge(State.OF,        State.NOUN);
-        graph.addEdge(State.OF,        State.PRONOUN);
-        graph.addEdge(State.NOUN,      State.OF);
+        graph.addEdge(State.PREPOS,        State.PRONOUN);
         graph.addEdge(State.NOUN,      State.IS);
         graph.addEdge(State.PRONOUN,   State.IS);
         graph.addEdge(State.IS,        State.ADJECTIVE);
@@ -67,6 +66,9 @@ public class BasicGraph {
         graph.addEdge(State.VERB,      State.PREPOS);
         graph.addEdge(State.IS,      State.PREPOS);
         graph.addEdge(State.PREPOS,      State.NOUN);
+        graph.addEdge(State.PREPOS,      State.ARTICLE);
+        graph.addEdge(State.PREPOS,      State.ADJECTIVE);
+        graph.addEdge(State.ADVERB,      State.VERB);
 
 
     }

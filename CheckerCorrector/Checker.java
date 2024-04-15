@@ -26,14 +26,20 @@ public class Checker {
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
                 List<String> extractedSentences = extractor.getSentences();  
+                int i = 0;
+                int n = extractedSentences.size();
+                int cntUpdate = 0;
                 for (String sentence : extractedSentences) {
-                    dbInterface.updateTokenInDatabase(sentence.toLowerCase(), graph);
+                    i++;
+                    //dbInterface.updateTokenInDatabase(sentence.toLowerCase(), graph);
                     PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 3, 5);
                     List<String> phrases = extractorPhrase.getPhrases();
                     for (String phrase : phrases) {
-                        dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);
-                    }                        
+                        cntUpdate += dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);
+                    } 
+                    ProgressBar.printProgress(((double)i)/((double)n));                     
                 }
+                System.out.println("\n-------------------------------------------\n"+ "Number of update: "+ cntUpdate);
             }else if(argPars.isCheckSentence()){
                 //dbInterface.updateTokenInDatabase(argPars.getSentence().toLowerCase(), graph);
                 for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),3, 5).getPhrases()) {

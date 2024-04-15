@@ -218,12 +218,12 @@ public class DBinterface {
         return new String();
     }
 
-    public void updateTokenInDatabase(String sentence, DirectedGraph<State> graph){
+    public int updateTokenInDatabase(String sentence, DirectedGraph<State> graph){
         //System.out.print(sentence + " |");
         sentence = StringProcessor.processString(sentence);
         
         if(sentence.equals(""))
-            return;
+            return 0;
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         //System.out.println(sentence);
@@ -287,28 +287,33 @@ public class DBinterface {
                // System.out.println(actions);
               //  System.out.println(suggested);
               //  System.out.println("---------------------------");
-                int cntUp=0;
-                for(int i=0; i<suggested.size(); i++){
-                    if(!suggested.get(i).toString().equals(tokens[i]))
-                        cntUp++;
-                }
                 
-                if(cntUp<3){
-                    for(int i=0; i<tokens.length; i++){
-                        if(missFlag.get(i)){
-                            if(!suggested.get(i).toString().equals(tokens[i]) && !suggested.get(i).toString().equals("nan") && State.validSuggestedState(suggested.get(i))){
-                                System.out.println(sentence);
-                                System.out.println(actions);
-                                System.out.println(suggested);
-                                System.out.println(missFlag);
-                                System.out.println(tokens[i] + "-> " + suggested.get(i));
-                                System.out.println("--------------------------------");
-                                wordRolesMap.put(tokens[i], suggested.get(i).toString()); 
-                            }
+                for(int i=0; i<suggested.size(); i++){
+                    if(!suggested.get(i).toString().equals(tokens[i])){
+                        if(!missFlag.get(i))
+                            return 0;
+                    }
+                        
+                }
+                int cntUpdate = 0;
+                for(int i=0; i<tokens.length; i++){
+                    if(missFlag.get(i)){
+                        if(!suggested.get(i).toString().equals(tokens[i]) && !suggested.get(i).toString().equals("nan") && State.validSuggestedState(suggested.get(i))){
+                            System.out.println("\n"+sentence);
+                            System.out.println(actions);
+                            System.out.println(suggested);
+                            System.out.println(missFlag);
+                            System.out.println(tokens[i] + " -> " + suggested.get(i));
+                            System.out.println("--------------------------------");
+                            wordRolesMap.put(tokens[i], suggested.get(i).toString()); 
+                            cntUpdate++;
                         }
                     }
                 }
+                return cntUpdate;
+                
             }
+            return 0;
     }
 
 
