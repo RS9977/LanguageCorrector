@@ -99,8 +99,8 @@ public class WordRoleUpdater extends JFrame {
         rejectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                wordRoles.remove(getCurrentWord()); // Remove the current word
-                changes.remove(getCurrentWord()); // Remove the change for the current word
+                //wordRoles.remove(getCurrentWord()); // Remove the current word
+                //changes.remove(getCurrentWord()); // Remove the change for the current word
                 updateNextWord(); // Move to the next word
             }
         });
@@ -195,14 +195,5 @@ public class WordRoleUpdater extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new WordRoleUpdater();
-            }
-        });
     }
 }
