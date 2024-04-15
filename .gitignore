@@ -7,6 +7,8 @@ CheckerCorrector/*.txt
 CheckerCorrector/*db
 CheckerCorrector/corrector
 CheckerCorrector/checker
+Crawler/target/classes/ScratchCrawler.class
+Crawler/target/classes/crawledData.txt
+*.java
 !CheckerCorrector/manifest*
 !CheckerCorrector/**/*.java
-*.java
