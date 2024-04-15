@@ -3,7 +3,9 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.*;
 
+import GUI.*;
 import HashTableMaker.HashTableMaker;
 import DirectedGraph.BasicGraph;
 import DirectedGraph.DirectedGraph;
@@ -21,7 +23,41 @@ public class Checker {
         DBinterface dbInterface = new DBinterface();
         DirectedGraph<State> graph = basicGraphClass.getGraph();
         JsonMaker jsonMaker = JsonMaker.create();
-        if(argPars.isUpdateHashTable()){
+
+        if(argPars.isValidateUpdates()){
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new WordRoleUpdater();
+                }
+            });
+        }else if(argPars.isUpdateToken()){
+            dbInterface.readDataFromDatabase();
+            if(argPars.isCheckFile()){
+                SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
+                List<String> extractedSentences = extractor.getSentences();  
+                int i = 0;
+                int n = extractedSentences.size();
+                int cntUpdate = 0;
+                for (String sentence : extractedSentences) {
+                    i++;
+                    //dbInterface.updateTokenInDatabase(sentence.toLowerCase(), graph);
+                    PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 3, 5);
+                    List<String> phrases = extractorPhrase.getPhrases();
+                    for (String phrase : phrases) {
+                        cntUpdate += dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);
+                    } 
+                    ProgressBar.printProgress(((double)i)/((double)n));                     
+                }
+                System.out.println("\n-------------------------------------------\n"+ "Number of update: "+ cntUpdate);
+            }else if(argPars.isCheckSentence()){
+                //dbInterface.updateTokenInDatabase(argPars.getSentence().toLowerCase(), graph);
+                for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),3, 5).getPhrases()) {
+                    dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
+                }
+            }
+            dbInterface.updateDatabase();
+        }else if(argPars.isUpdateHashTable()){
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
                 List<String> extractedSentences = extractor.getSentences();  

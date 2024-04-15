@@ -1,5 +1,6 @@
 package util;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PhraseExtractor {
@@ -26,8 +27,9 @@ public class PhraseExtractor {
     private static List<String> extractPhrases(String sentence, int start, int end) {
         List<String> phrases = new ArrayList<>();
         String[] words = sentence.split("\\s+");
+        //System.out.println(Arrays.asList(words));
         for (int i = 0; i < words.length; i++) {
-            for (int j = i + start; (j <= end & j<=words.length); j++){//words.length; j++) {
+            for (int j = i + start; (j <= i+end && j<=words.length); j++){//words.length; j++) {
                 StringBuilder phraseBuilder = new StringBuilder();
                 for (int k = i; k < j; k++) {
                     phraseBuilder.append(words[k]);
@@ -38,6 +40,7 @@ public class PhraseExtractor {
                 phrases.add(phraseBuilder.toString());
             }
         }
+        
         return phrases;
     }
 

@@ -54,7 +54,7 @@ public class StateMachine{
         }else{
             Set<String> allPaths = new HashSet<>();
             DFS dfs = DFS.of();
-            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.size()+1));
+            allPaths.addAll(dfs.dfs(graph, actions.get(0), State.DOT, actions.size()+1, 4));
             StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
             for(String path: allPaths)
                 sfw.appendString(path);
@@ -78,7 +78,48 @@ public class StateMachine{
         return TwoListStruct.of(suggestedAction, flags);
     }
 
+    public List<State> updateDB(DirectedGraph<State> graph, List<State> actions, State initialState){
+        State currentState = initialState;
+        boolean flag = false;
+        List<State> suggestedAction = new ArrayList<>();
+        List<Integer> flags         = new ArrayList<>();
+        State tempState = currentState;
+        //suggestedAction.add(currentState);
+        int cnt = 0;
 
+        StateMachine SM = new StateMachine();
+        int confidence = SM.isStateMachineFollowed(graph, actions, actions.get(0), 0);
+        if(confidence<10){
+            for(int i =0; i<actions.size(); i++)
+                flags.add(0);
+            return actions;
+        }else{
+            Set<String> allPaths = new HashSet<>();
+            DFS dfs = DFS.of();
+            allPaths.addAll(dfs.dfs(graph, actions.get(0), actions.get(actions.size()-1), actions.size()-1, 0));
+            StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
+            for(String path: allPaths)
+                sfw.appendString(path);
+            try {
+                sfw.writeToFile();
+                TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -6, 0, -2, -10);
+                ListToString lts = ListToString.of();
+                for(State action: actions)
+                    lts.addString(action);
+                String suggestedActionsString = tc.closestWord(lts.getString());
+                ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
+                List<State> parts = StringToList.split(suggestedActionsString);
+                suggestedAction.addAll(parts);
+                flags.addAll(tc.traceBack());
+                return suggestedAction;
+            } catch (IOException e) {
+                System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            }
+        }
+
+        return suggestedAction;
+    }
+    
     /*
     public TwoListStruct suggestedStateMachine(DirectedGraph<State> graph, List<State> actions, State initialState) {
         
