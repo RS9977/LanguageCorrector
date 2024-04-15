@@ -11,12 +11,14 @@ public class ArgumentParser {
     private boolean checkSentence;
     private boolean checkFile;
     private boolean updateHashTable;
+    private boolean validateUpdates;
 
     ArgumentParser(String[] args) {
         checkSentence = false;
         updateToken = false;
         checkFile  = false;
         updateHashTable = false;
+        validateUpdates = false;
         parseArguments(Arrays.asList(args));
     }
 
@@ -55,6 +57,9 @@ public class ArgumentParser {
                         break;
                     case "--updateHashTable":
                         updateHashTable = true;
+                        break;
+                    case "--validateUpdates":
+                        validateUpdates = true;
                         break;
                     // Add cases for other arguments here
                     default:
@@ -95,5 +100,8 @@ public class ArgumentParser {
     }
     public boolean isUpdateHashTable(){
         return updateHashTable;
+    }
+    public boolean isValidateUpdates(){
+        return validateUpdates;
     }
 }

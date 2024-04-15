@@ -3,7 +3,9 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.*;
 
+import GUI.*;
 import HashTableMaker.HashTableMaker;
 import DirectedGraph.BasicGraph;
 import DirectedGraph.DirectedGraph;
@@ -21,7 +23,15 @@ public class Checker {
         DBinterface dbInterface = new DBinterface();
         DirectedGraph<State> graph = basicGraphClass.getGraph();
         JsonMaker jsonMaker = JsonMaker.create();
-        if(argPars.isUpdateToken()){
+
+        if(argPars.isValidateUpdates()){
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new WordRoleUpdater();
+                }
+            });
+        }else if(argPars.isUpdateToken()){
             dbInterface.readDataFromDatabase();
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
