@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WordRoleUpdater extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:./SQLite/newdatabase.db";
+    private String DB_URL = "jdbc:sqlite:./";
     private static final String TABLE_NAME = "word_roles";
     private static final int POPUP_WIDTH = 300;
     private static final int POPUP_HEIGHT = 200;
@@ -29,7 +29,8 @@ public class WordRoleUpdater extends JFrame {
     private JButton backButton;
     private JButton nextButton;
 
-    public WordRoleUpdater() {
+    public WordRoleUpdater(String DB_URL_suffix) {
+        DB_URL = DB_URL.concat(DB_URL_suffix);
         try {
             connection = DriverManager.getConnection(DB_URL);
             loadWordRoles();
