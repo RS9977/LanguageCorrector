@@ -139,6 +139,13 @@ public class Checker {
             }
             jsonMaker.toJson("confidence_ourChecker.json");
             System.out.println("##########################################################");
+        }else if(argPars.isCheckGUI()){
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new HighlighterGUI();
+                }
+            });
         }
           
     }

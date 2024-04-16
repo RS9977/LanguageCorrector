@@ -21,7 +21,7 @@ public class Corrector {
         DBinterface dbInterface = new DBinterface();
         DirectedGraph<State> graph = basicGraphClass.getGraph();
         StringFileWriter stringWriter = StringFileWriter.of("corrected.txt");
-
+        StringFileWriter.deleteFile("correction_details.txt");
         if(argPars.isCheckFile()){
             SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
             List<String> extractedSentences = extractor.getSentences();  

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.io.IOException;
 
 import DirectedGraph.DirectedGraph;
 
@@ -11,6 +12,7 @@ import java.sql.*;
 import StateMachine.*;
 import TypoCorrector.TypoCorrector;
 import util.TwoListStruct;
+import util.StringFileWriter;
 import util.StringProcessor;
 
 
@@ -156,6 +158,7 @@ public class DBinterface {
             int delCnt = 0;
             boolean seenDot = false;
             int     indDotseen = Math.max(suggested.size()+1, flags.size()+1);
+            StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", true);
             for(int i=0; i<suggested.size(); i++){
                 if(seenDot){
                     //indDotseen = i;
@@ -173,14 +176,19 @@ public class DBinterface {
                         if (resultSet.next()) {
                             word = resultSet.getString("word");
                             ////System.out.println("Here I am: "+ word);
-                            if(i<tokenList.size())
+                            if(i<tokenList.size()){
+                                sfw.appendString(tokenList.get(i) + " -> "+ word);
                                 tokenList.set(i,word);
-                            else
+                                
+                            }else{
+                                sfw.appendString("IND: "+ i + " -> "+ word);
                                 tokenList.add(word);
+                            }
                         }
                     }
                 }else if(flags.get(i+delCnt)==2){
                     delCnt++;
+                    sfw.appendString(tokenList.get(i) + " -> X");
                     tokenList.remove(i);
                 }else if(flags.get(i+delCnt)==3){
                     try (Statement statement = connection.createStatement()) {
@@ -191,14 +199,23 @@ public class DBinterface {
                         if (resultSet.next()) {
                             word = resultSet.getString("word");
                             ////System.out.println("Here I am: "+ word);
-                            if(i<tokenList.size())
+                            if(i<tokenList.size()){
+                                sfw.appendString("IND: "+ i + " -> "+ word);
                                 tokenList.add(i,word);
-                            else
+                            }else{
+                                sfw.appendString("IND: "+ i + " -> "+ word);
                                 tokenList.add(word);
+                            }
                         }
                     }
                 }
             }   
+            try {
+                sfw.appendString("-----------------------------------------");
+                sfw.writeToFile();
+            } catch (IOException e) {
+                System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            }
             StringBuilder result = new StringBuilder();
             boolean flagStart = false;
             int i = 0;
@@ -268,7 +285,7 @@ public class DBinterface {
                             cntMiss ++;
                         }
                 }
-                if(cntMiss>2)
+                if(cntMiss>1)
                     return 0;
                     //System.out.print("After token: "+tokens[i]+"| ");
                     //System.out.println();
