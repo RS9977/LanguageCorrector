@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import DBinterface.DBinterface;
@@ -35,27 +36,45 @@ public class Corrector implements GUIListener {
 
     @Override
     public String updateFlagsAndLabel(List<Boolean> flags) {
-        this.curSentenceGUI = dbInterfaceGUI.correctTokenInDatabaseGUI(this.curSentenceGUI.toLowerCase(), graphGUI, flags);
-        String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
+        String tempString = dbInterfaceGUI.correctTokenInDatabaseGUI(this.curSentenceGUI.toLowerCase(), graphGUI, flags);
+        if(tempString.contains("|")){
+            String[] parts = tempString.split("|");
+            //this.curSentenceGUI = parts[0];
+            int ind = Integer.parseInt(parts[1]);
+            List<Boolean> flagsTemp = new ArrayList<>();
+            for(int k=0; k<flags.size(); k++){
+                if(k<=ind)
+                    flagsTemp.add(flags.get(k));
+                else
+                    flagsTemp.add(true);
+            }
+            String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false, flags);
+        }else{
+            this.curSentenceGUI = tempString;
+            String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
+        }
         return this.curSentenceGUI;
     }
 
     @Override
     public String loadNextSentece() {
-        if(this.senteceIndGUI>=extractedSentencesGUI.size()){
-            System.out.println("end!");
-            return "";
-        }
+        
         stringWriterGUI.appendString(this.curSentenceGUI);
-        this.senteceIndGUI++;
-        this.curSentenceGUI = extractedSentencesGUI.get(senteceIndGUI);
-        String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
         try {
             stringWriterGUI.writeToFile();
            // System.out.println("Corrected version has been written to the file.");
         } catch (IOException e) {
             System.err.println("An error occurred while writing to the file: " + e.getMessage());
         }
+
+        this.senteceIndGUI++;
+        if(this.senteceIndGUI>=extractedSentencesGUI.size()){
+            System.out.println("end!");
+            return "";
+        }
+        
+        this.curSentenceGUI = extractedSentencesGUI.get(senteceIndGUI);
+        String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
         return this.curSentenceGUI;
 
     }
