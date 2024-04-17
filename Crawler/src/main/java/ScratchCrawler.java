@@ -82,6 +82,7 @@ public class ScratchCrawler {
         try {
             URL pageURL = new URL(url); // Create a new URL object
             String domain = extractDomain(url); // Extract the domain from the URL
+            String tdl = domain.substring(domain.lastIndexOf(".")); // Extract the top-level domain
 
             HttpURLConnection connection = (HttpURLConnection) pageURL.openConnection();
             // Set the User-Agent header
@@ -125,7 +126,18 @@ public class ScratchCrawler {
             
             // Code to read the page
             BufferedReader reader = new BufferedReader(new InputStreamReader(pageURL.openStream())); // Create a new BufferReader object
-            PrintWriter writer = new PrintWriter(new FileWriter("crawledData.txt",true)); // Create a new PrintWriter object
+            PrintWriter writer; // Create a new PrintWriter object
+
+            
+            if(tdl.equals(".nl")) {
+                writer = new PrintWriter(new FileWriter("crawledDataDutch.txt",true)); // Create a new PrintWriter object
+            }
+            else if(tdl.equals(".tr")){
+                writer = new PrintWriter(new FileWriter("crawledDataTurkish.txt",true)); // Create a new PrintWriter object
+            }
+            else {
+                writer = new PrintWriter(new FileWriter("crawledDataEnglish.txt",true)); // Create a new PrintWriter object
+            }
             
             String line; // Declare a string to store each line of the page
             StringBuilder pageContent = new StringBuilder(); // To store the page content
@@ -599,15 +611,21 @@ public class ScratchCrawler {
                     crawler.pagesToVisit.add("https://www.tumblr.com/");
                     startCrawl = true;
                     break;
-                case "--dutch":
+                case "--dutchDict":
                     // Extension of our crawler with an English to Dutch translation
                     crawlingDutch = true;
+                    startCrawl = true;
+                    break;
+                case "--dutchSeed":
+                    //  Extend your system to a language in which none of the team members have fluency
+                    // Adds a Dutch website as a seed URL
+                    crawler.pagesToVisit.add("https://www.rijksmuseum.nl/");
                     startCrawl = true;
                     break;
                 case "--turkish":
                     //  Extend your system to a language in which none of the team members have fluency
                     // Adds a Turkish website as a seed URL
-                    crawler.pagesToVisit.add("https://eksisozluk.com/");
+                    crawler.pagesToVisit.add("https://www.hurriyet.com.tr/");
                     startCrawl = true;
                     break;
                 case "--xl":
@@ -622,7 +640,8 @@ public class ScratchCrawler {
                     System.out.println("--timeout <seconds>: Set the timeout for each page in seconds");
                     System.out.println("--stats: Print statistics during crawling");
                     System.out.println("--social: Include crawling from Tumblr social media platform");
-                    System.out.println("--dutch: Include crawling from Dutch translation website");
+                    System.out.println("--dutchDict: Include crawling from Dutch to English dictionary website");
+                    System.out.println("--dutchSeed: Include crawling from Dutch website");
                     System.out.println("--turkish: Include crawling from Turkish website");
                     System.out.println("--xl: Increase the storage size per page to 1 MB");
                     System.out.println("--help: Display this help message");
