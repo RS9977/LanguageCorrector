@@ -71,4 +71,42 @@ public class RegexParser {
         String[] parts = url.split("/");
         return parts[parts.length - 1];
     }
+
+    // Parse the Dutch dictionary
+    public static String parseDutchDict(String line, int curPart) {
+        String entry = null;
+    
+        // Regular expression pattern to match dictionary entries
+        Pattern patternEntry = Pattern.compile("<div class=\"vocab\">(.*?)</div>");
+        Matcher matcherEntry = patternEntry.matcher(line);
+        if (matcherEntry.find() && curPart == 0) {
+            entry = matcherEntry.group(1);
+            return entry;
+        } else if (matcherEntry.find() && curPart != 0) {
+            return "$BAD";
+        }
+    
+        // Regular expression pattern to match parts of speech
+        Pattern patternPos = Pattern.compile("<div class=\"pos\">\\[(.*?)\\]</div>");
+        Matcher matcherPos = patternPos.matcher(line);
+        if (matcherPos.find() && curPart == 1) {
+            entry = matcherPos.group(1);
+            return entry;
+        } else if (matcherPos.find() && curPart != 1) {
+            return "$BAD";
+        }
+    
+        // Regular expression pattern to match definitions
+        Pattern patternDefinition = Pattern.compile("<div class=\"definition\">\\((.*?)\\)</div>");
+        Matcher matcherDefinition = patternDefinition.matcher(line);
+        if (matcherDefinition.find() && curPart == 2) {
+            entry = matcherDefinition.group(1);
+            return entry;
+        } else if (matcherDefinition.find() && curPart != 2) {
+            return "$BAD";
+        }
+    
+        // Did not find a Duct Word, Part of Speech, or Definition
+        return null;
+    }
 }

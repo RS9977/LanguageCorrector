@@ -1,6 +1,7 @@
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class ScratchCrawler {
     public static double processingRateSize = 0; // Processing rate in bytes per second
     public static boolean printStats = false; // Print stats flag
     public static int max_storage = 1000; // Maximum storage size per page in bytes
+    public static boolean crawlingDutch = false; // Flag to crawl Dutch translation website
 
     // Using a HashSet to store visited pages and pages to visit. This is the best data structure 
     // for this use case because it has O(1) time complexity for add, remove, and contains 
@@ -76,11 +78,6 @@ public class ScratchCrawler {
         if (printStats) {
             System.out.println("Processing URL: " + url); 
         }
-
-        // REMOVE ME - fixing RegexParser.extractLinks() to handle URLs ending with ')'
-        // if (url.endsWith(")")) {
-        //     url = url.substring(0, url.length() - 1);
-        // }
         
         try {
             URL pageURL = new URL(url); // Create a new URL object
@@ -361,6 +358,10 @@ public class ScratchCrawler {
     //     System.out.println("Crawling complete."); // Print message
     // }
     public void crawl() {
+        if (crawlingDutch) {
+            crawlDutchDict(); // Crawl the Dutch translation website
+        }
+        
         while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
             String nextPage = getNextPage(); // Get the next page
             
@@ -386,6 +387,155 @@ public class ScratchCrawler {
         System.out.println("Crawling complete."); // Print message
     }
 
+    public static void crawlDutchDict() {
+        // Code to crawl Dutch translation website, parse it, and save to dedicated file
+        // Very similar to the getPage method, but with different parsing and writing logic  
+
+        String url = "https://travelwithlanguages.com/blog/most-common-dutch-words.html"; // URL of the Dutch translation website
+
+        // Provide real-time status and statistics feedback for the crawler
+        if (printStats) {
+            System.out.println("Processing Dutch-English Dictionary");
+            System.out.println("Processing URL: " + url); 
+        }
+        
+        try {
+            URL pageURL = new URL(url); // Create a new URL object
+            String domain = extractDomain(url); // Extract the domain from the URL
+
+            HttpURLConnection connection = (HttpURLConnection) pageURL.openConnection();
+            // Set the User-Agent header
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                if (printStats) System.out.println("Error reading page. Response code: " + responseCode);
+
+                // If the page is not found, add the domain to the disallowedDomains set
+                disallowedDomains.add(domain);
+
+                if (Debug.DEBUG)
+                    System.out.println("Adding domain to disallowedDomains: " + domain); // Print message
+
+                return;
+            }
+            
+            // Check if url is allowed by robots.txt
+            if (isInVisitedRobotsTxt(domain)) { // If the URL is in the visited robots.txt
+                RobotsTXT robotsTXT = visitedRobotsTXTs.get(domain); // Get the RobotsTXT object for the URL
+                if (robotsTXT.getDisallowedPaths().contains(url) || disallowedDomains.contains(domain)) { // If the URL is disallowed
+                    if(printStats) System.out.println("URL is disallowed"); // Print message
+                    return; // Exit the method
+                } else {
+                    // URL is allowed
+                    // Update the wait time based on the crawl delay
+                    waitTime = robotsTXT.getCrawlDelay() * 1000; // Update the wait time based on the crawl delay                       
+                }
+            } else {
+                parseRobotsTXT(url); // Parse the robots.txt file
+
+                // 
+            }
+
+            // Update the wait time based on the crawl delay
+            if (visitedRobotsTXTs.containsKey(url)) { // If the URL is in the visited robots.txt
+                RobotsTXT robotsTXT = visitedRobotsTXTs.get(url); // Get the RobotsTXT object for the URL
+                waitTime = robotsTXT.getCrawlDelay() * 1000; // Update the wait time based on the crawl delay
+            }
+            
+            // Code to read the page
+            BufferedReader reader = new BufferedReader(new InputStreamReader(pageURL.openStream())); // Create a new BufferReader object
+            PrintWriter writer = new PrintWriter(new FileWriter("DutchTranslation.txt",false)); // Create a new PrintWriter object
+            
+            String line; // Declare a string to store each line of the page
+            String curDutch = ""; // Declare strings to store the current Dutch word, Part of Speech, and English translation
+            String curPOS = "";
+            String curEng = ""; 
+            int count = 0; // Counter for which part of the entry we are on
+
+            int entryCount = 0; // Counter for entries
+            int skipCount = 0; // Counter for skipped entries
+
+            while ((line = reader.readLine()) != null) { // While there are lines to read
+                // Parse the line for Dutch words and their English translations
+                String value = RegexParser.parseDutchDict(line, count); // Extract the Dutch word, Part of Speech, or English translation from the line
+                boolean skippingEntry = false; // Flag to skip the entry
+
+                if (value != null) {
+                    switch(count) {
+                        case 0:
+                            if (value.equals("$BAD")) {
+                                skippingEntry = true; // Do not skip the entry
+                            } 
+                            curDutch = value; // Set the current Dutch word
+                            count++; // Increment the count
+                            break;
+                        case 1:
+                            if (value.equals("$BAD")) {
+                                skippingEntry = true; // Do not skip the entry
+                            } 
+                            curPOS = value; // Set the current Part of Speech
+                            count++; // Increment the count
+                            break;
+                        case 2:
+                            if (value.equals("$BAD")) {
+                                skippingEntry = true; // Do not skip the entry
+                            } 
+                            curEng = value; // Set the current English translation
+                            count = 0; // Reset the count
+                            
+                            if (Debug.DEBUG_Dutch) {
+                                System.out.println(skippingEntry + " " + curDutch + " " + curPOS + " " + curEng); // Print the entry
+                            }
+                            if(!skippingEntry) {
+                                writer.println(curDutch + " " + curPOS + " " + curEng); // Write the entry to the file
+                                totalSize += curDutch.length() + curPOS.length() + curEng.length(); // Update the total size
+                            } else {
+                                skipCount++; // Increment the skip count
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } 
+
+            // Provide real-time status and statistics feedback for the crawler
+            processingRatePages = 1000 / (double)waitTime; // Processing rate in pages per second (inverse waitTime)
+            processingRateSize = totalSize * processingRatePages; // Processing rate in bytes per second
+
+            if (printStats) {
+                System.out.println("Length of page processed [Bytes]: " + totalSize);
+                System.out.println("Number of entries extracted: " + entryCount);
+                System.out.println("Number of entries skipped: " + skipCount);
+                //System.out.println("Total size of pages visited [Bytes]: " + totalSize);
+                //System.out.println("Number of pages crawled  (" + MAX_PAGES + " pages max): " + pagesVisited.size());
+                //System.out.println("URLs available to crawl: " +  pagesToVisit.size());
+                System.out.println("Processing rate in pages per second: " + processingRatePages);
+                System.out.println("Processing rate in bytes per second: " + processingRateSize);
+            }
+           
+
+            writer.close(); // Close the writer
+            reader.close(); // Close the reader
+
+        } catch (MalformedURLException e) {
+            if(printStats) {
+                System.out.println("Error creating URL object.");
+                e.printStackTrace();
+            }
+            return; // Exit the method
+        } catch (IOException e) {
+            if(printStats) {
+                System.out.println("Error reading page.");
+                e.printStackTrace();
+            }
+            return; // Exit the method
+        } 
+
+
+    }
+
     public void readURLsFromFile(String filePath) {
         try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
             List<String> urls = stream.collect(Collectors.toList()); // Convert the stream to a list
@@ -398,8 +548,6 @@ public class ScratchCrawler {
         }
     }
 
-
-    // For testing purposes
     public static void main(String[] args) {
 
         ScratchCrawler crawler = new ScratchCrawler(); // Create a new ScratchCrawler object
@@ -453,7 +601,13 @@ public class ScratchCrawler {
                     break;
                 case "--dutch":
                     // Extension of our crawler with an English to Dutch translation
-                    crawler.pagesToVisit.add("https://travelwithlanguages.com/blog/most-common-dutch-words.html");
+                    crawlingDutch = true;
+                    startCrawl = true;
+                    break;
+                case "--turkish":
+                    //  Extend your system to a language in which none of the team members have fluency
+                    // Adds a Turkish website as a seed URL
+                    crawler.pagesToVisit.add("https://eksisozluk.com/");
                     startCrawl = true;
                     break;
                 case "--turkish":
