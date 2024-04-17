@@ -9,6 +9,7 @@ CheckerCorrector/corrector
 CheckerCorrector/checker
 Crawler/target/classes/ScratchCrawler.class
 Crawler/target/classes/crawledData.txt
+*.db
 *.java
 !CheckerCorrector/manifest*
 !CheckerCorrector/**/*.java

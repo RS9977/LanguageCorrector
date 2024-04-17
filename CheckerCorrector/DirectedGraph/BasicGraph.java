@@ -187,7 +187,7 @@ public class BasicGraph {
     private void createTable() {
         edgeList = new HashMap<>();
         // SQL statement to create the table
-        String sqlCreateTable = "CREATE TABLE nodeOne_nodeTwo ("
+        /*String sqlCreateTable = "CREATE TABLE nodeOne_nodeTwo ("
                 + "nodeOne VARCHAR(50) PRIMARY KEY,"
                 + "nodeTwo VARCHAR(50)"
                 + ")";
@@ -198,7 +198,7 @@ public class BasicGraph {
             stmt.execute(sqlCreateTable);
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     // Method to read data from SQLite database into HashMap

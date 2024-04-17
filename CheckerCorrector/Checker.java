@@ -25,10 +25,15 @@ public class Checker {
         JsonMaker jsonMaker = JsonMaker.create();
 
         if(argPars.isValidateUpdates()){
+            
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    new WordRoleUpdater();
+                    String dbName = "SQLite/newdatabase.db";
+                    if(argPars.isCheckFile()){
+                        dbName = argPars.getFileName();
+                    }
+                    new WordRoleUpdater(dbName);
                 }
             });
         }else if(argPars.isUpdateToken()){
@@ -134,6 +139,13 @@ public class Checker {
             }
             jsonMaker.toJson("confidence_ourChecker.json");
             System.out.println("##########################################################");
+        }else if(argPars.isCheckGUI()){
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new HighlighterGUI();
+                }
+            });
         }
           
     }

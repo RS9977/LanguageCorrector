@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.io.IOException;
 
 import DirectedGraph.DirectedGraph;
 
@@ -11,8 +12,10 @@ import java.sql.*;
 import StateMachine.*;
 import TypoCorrector.TypoCorrector;
 import util.TwoListStruct;
+import util.StringFileWriter;
 import util.StringProcessor;
 
+import GUI.SelectCorrectionHandler;
 
 public class DBinterface {
     public int checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
@@ -80,16 +83,30 @@ public class DBinterface {
         return 0;
     }
 
-    public String correctTokenInDatabase(String sentence, DirectedGraph<State> graph){
-        for(int i=0; i<2; i++){
-            sentence = new String(correctTokenInDatabaseInnerloop(sentence, graph));
+    public String correctTokenInDatabase(String sentence, DirectedGraph<State> graph, int cnt, boolean isNotGUI){
+        List<Boolean> flagsCorrection = new ArrayList<>();
+        for(int i=0; i<cnt; i++){ 
+            sentence = new String(correctTokenInDatabaseInnerloop(sentence, graph, flagsCorrection, isNotGUI));
             if(checkTokenInDatabase(sentence, graph)<10)
                 break;
         }
         return sentence;
     }
 
-    private String correctTokenInDatabaseInnerloop(String sentence, DirectedGraph<State> graph){
+    public String correctTokenInDatabase(String sentence, DirectedGraph<State> graph, int cnt, boolean isNotGUI, List<Boolean> flagsCorrection){
+        for(int i=0; i<cnt; i++){ 
+            sentence = new String(correctTokenInDatabaseInnerloop(sentence, graph, flagsCorrection, isNotGUI));
+            if(checkTokenInDatabase(sentence, graph)<10)
+                break;
+        }
+        return sentence;
+    }
+
+    public String correctTokenInDatabaseGUI(String sentence, DirectedGraph<State> graph, List<Boolean> flagsCorrection){
+        return  correctTokenInDatabaseInnerloop(sentence, graph, flagsCorrection, false);
+    }
+
+    private String correctTokenInDatabaseInnerloop(String sentence, DirectedGraph<State> graph, List<Boolean> flagsCorrection, boolean isNotGUI){
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
@@ -99,6 +116,9 @@ public class DBinterface {
         String dicFileName = "./SQLite/smallDic.txt";
         TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
         int initialConf = 0;
+        int flagsCorrectioncnt = 0;
+        boolean flagTypoCorrectionAccepted = true;
+        StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", isNotGUI);
         try (Connection connection = DriverManager.getConnection(url)) {
 
             // Lookup each token in the database and categorize it
@@ -119,8 +139,20 @@ public class DBinterface {
                         String tokenCorrected = new String();
                         if(role.isEmpty()){
                             tokenCorrected = typoChecker.closestWord(token);
-                            if(!tokenCorrected.equals(token))
+                            if(!tokenCorrected.equals(token)){
+                                
                                 initialConf += 5;
+                                if(flagsCorrection.isEmpty()){
+                                    sfw.appendString(token + " -> "+ tokenCorrected + "*");
+                                }else if(!flagsCorrection.get(flagsCorrectioncnt) && isNotGUI){
+                                    flagTypoCorrectionAccepted = false;
+                                    //tokenList.set(i, "nan");
+                                    break;
+                                }else if(!flagsCorrection.get(flagsCorrectioncnt)){
+                                    tokenCorrected = token;
+                                }
+                                flagsCorrectioncnt++;
+                            }
                            // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
 
                             query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
@@ -138,67 +170,128 @@ public class DBinterface {
                     }
                     //////System.out.println();
             }
+            int     indDotseen = tokenList.size()+1;
+            if(flagTypoCorrectionAccepted){
+                List<State> actions = new ArrayList<>();
 
-            List<State> actions = new ArrayList<>();
+                for(String token: tokens){
+                    actions.add(State.fromString(token));
+                }
+                // Define the initial state
+                State initialState = State.START;
 
-            for(String token: tokens){
-                actions.add(State.fromString(token));
+                // Check if the sequence of actions follows the state machine
+
+                TwoListStruct<State, Integer> output = SM.suggestedStateMachine(graph, actions, initialState);
+            // output.displayArrays();
+                List<State> suggested = output.getOutputList();
+                List<Integer> flags   = output.getChangesList();
+                int delCnt = 0;
+                boolean seenDot = false;
+                indDotseen = Math.max(suggested.size()+1, flags.size()+1);
+                
+                
+                int biasToken = 0;
+                
+                //if(!isNotGUI)
+                // System.out.println(flagsCorrection);
+                for(int i=0; i<suggested.size(); i++){
+                    if(seenDot){
+                        //indDotseen = i;
+                    // break;
+                    }
+                    if(suggested.get(i) == State.DOT)
+                        seenDot = true;
+                    if(flags.get(i+delCnt)==1){
+                        try (Statement statement = connection.createStatement()) {
+                            String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
+                            String word = new String();
+                            ResultSet resultSet = statement.executeQuery(query);
+                            
+                            ////System.out.print("!!! 1: " + resultSet + "| ");
+                            if (resultSet.next()) {
+                                word = resultSet.getString("word");
+                                ////System.out.println("Here I am: "+ word);
+                                if(i+biasToken<tokenList.size()){
+                                    
+                                    if(flagsCorrection.isEmpty()){
+                                        tokenList.set(i+biasToken,word);
+                                        sfw.appendString(tokenList.get(i) + " -> "+ word);
+                                    }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                        
+                                        tokenList.set(i+biasToken,word);
+                                    }
+                                    
+                                    
+                                }else{
+                                    if(flagsCorrection.isEmpty()){
+                                        sfw.appendString("IND: "+ i + " -> "+ word);
+                                        tokenList.add(word);
+                                    }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                        tokenList.add(word);
+                                    }
+                                }
+                                flagsCorrectioncnt++;
+                                //System.out.println(biasToken);
+                            }
+                        }
+                    }else if(flags.get(i+delCnt)==2){
+                        delCnt++;
+                        if(flagsCorrection.isEmpty()){
+                            sfw.appendString(tokenList.get(i) + " -> X");
+                            tokenList.remove(i+biasToken);
+                        }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                            tokenList.remove(i+biasToken);
+                        }else{
+                            biasToken++;
+                        }
+                        flagsCorrectioncnt++;
+                    // System.out.println(biasToken);
+                    }else if(flags.get(i+delCnt)==3){
+                        try (Statement statement = connection.createStatement()) {
+                            ////System.out.println(suggested.get(i));
+                            String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
+                            String word = new String();
+                            ResultSet resultSet = statement.executeQuery(query);
+                            if (resultSet.next()) {
+                                word = resultSet.getString("word");
+                                ////System.out.println("Here I am: "+ word);
+                                
+                                if(flagsCorrection.isEmpty()){
+                                    sfw.appendString("IND: "+ i + " -> "+ word);
+                                    if(i<tokenList.size()){
+                                        tokenList.add(i+biasToken,word);
+                                    }else{
+                                        tokenList.add(word);
+                                    }
+                                }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                    if(i<tokenList.size()){
+                                    // System.out.println("here!");
+                                        tokenList.add(i+biasToken,word);
+                                    }else{
+                                        tokenList.add(word);
+                                    }
+                                }else{
+                                    biasToken--;
+                                }
+                                flagsCorrectioncnt++;
+                            // System.out.println(biasToken);
+                            }
+                        }
+                    }
+                }   
             }
-            // Define the initial state
-            State initialState = State.START;
 
-            // Check if the sequence of actions follows the state machine
-
-            TwoListStruct<State, Integer> output = SM.suggestedStateMachine(graph, actions, initialState);
-           // output.displayArrays();
-            List<State> suggested = output.getOutputList();
-            List<Integer> flags   = output.getChangesList();
-            int delCnt = 0;
-            boolean seenDot = false;
-            int     indDotseen = Math.max(suggested.size()+1, flags.size()+1);
-            for(int i=0; i<suggested.size(); i++){
-                if(seenDot){
-                    //indDotseen = i;
-                   // break;
+            try {
+                if(isNotGUI)
+                    sfw.appendString("-----------------------------------------");
+                if(flagsCorrection.isEmpty()){
+                    sfw.writeToFile();
                 }
-                if(suggested.get(i) == State.DOT)
-                    seenDot = true;
-                if(flags.get(i+delCnt)==1){
-                    try (Statement statement = connection.createStatement()) {
-                        String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
-                        String word = new String();
-                        ResultSet resultSet = statement.executeQuery(query);
-                        
-                        ////System.out.print("!!! 1: " + resultSet + "| ");
-                        if (resultSet.next()) {
-                            word = resultSet.getString("word");
-                            ////System.out.println("Here I am: "+ word);
-                            if(i<tokenList.size())
-                                tokenList.set(i,word);
-                            else
-                                tokenList.add(word);
-                        }
-                    }
-                }else if(flags.get(i+delCnt)==2){
-                    delCnt++;
-                    tokenList.remove(i);
-                }else if(flags.get(i+delCnt)==3){
-                    try (Statement statement = connection.createStatement()) {
-                        ////System.out.println(suggested.get(i));
-                        String query = "SELECT word FROM word_roles WHERE role = '" + suggested.get(i) + "';";
-                        String word = new String();
-                        ResultSet resultSet = statement.executeQuery(query);
-                        if (resultSet.next()) {
-                            word = resultSet.getString("word");
-                            ////System.out.println("Here I am: "+ word);
-                            if(i<tokenList.size())
-                                tokenList.add(i,word);
-                            else
-                                tokenList.add(word);
-                        }
-                    }
-                }
-            }   
+            } catch (IOException e) {
+                System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            }
+           // System.out.println(tokenList);
             StringBuilder result = new StringBuilder();
             boolean flagStart = false;
             int i = 0;
@@ -210,6 +303,10 @@ public class DBinterface {
                 result.append(token);
                 flagStart = true;  
                 i++;
+            }
+            if(!flagTypoCorrectionAccepted){
+                result.append("|");
+                result.append(flagsCorrectioncnt);
             }
             return result.toString();
         } catch (SQLException e) {
@@ -268,12 +365,14 @@ public class DBinterface {
                             cntMiss ++;
                         }
                 }
+                if(cntMiss>1)
+                    return 0;
                     //System.out.print("After token: "+tokens[i]+"| ");
-                    //////System.out.println();
+                    //System.out.println();
             }
             
             //System.out.println("\nMISS: "+cntMiss);
-            if(cntMiss<3 && cntMiss>0 && !missFlag.get(missFlag.size()-1)){
+            if(cntMiss>0 && !missFlag.get(missFlag.size()-1)){
                 List<State> actions = new ArrayList<>();
 
                 for(String token: tokens){
