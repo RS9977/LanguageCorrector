@@ -15,6 +15,7 @@ import util.TwoListStruct;
 import util.StringFileWriter;
 import util.StringProcessor;
 
+import GUI.SelectCorrectionHandler;
 
 public class DBinterface {
     public int checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
@@ -82,16 +83,21 @@ public class DBinterface {
         return 0;
     }
 
-    public String correctTokenInDatabase(String sentence, DirectedGraph<State> graph){
-        for(int i=0; i<2; i++){
-            sentence = new String(correctTokenInDatabaseInnerloop(sentence, graph));
+    public String correctTokenInDatabase(String sentence, DirectedGraph<State> graph, int cnt, boolean isNotGUI){
+        List<Boolean> flagsCorrection = new ArrayList<>();
+        for(int i=0; i<cnt; i++){ 
+            sentence = new String(correctTokenInDatabaseInnerloop(sentence, graph, flagsCorrection, isNotGUI));
             if(checkTokenInDatabase(sentence, graph)<10)
                 break;
         }
         return sentence;
     }
 
-    private String correctTokenInDatabaseInnerloop(String sentence, DirectedGraph<State> graph){
+    public String correctTokenInDatabaseGUI(String sentence, DirectedGraph<State> graph, List<Boolean> flagsCorrection){
+        return  correctTokenInDatabaseInnerloop(sentence, graph, flagsCorrection, false);
+    }
+
+    private String correctTokenInDatabaseInnerloop(String sentence, DirectedGraph<State> graph, List<Boolean> flagsCorrection, boolean isNotGUI){
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
@@ -158,7 +164,8 @@ public class DBinterface {
             int delCnt = 0;
             boolean seenDot = false;
             int     indDotseen = Math.max(suggested.size()+1, flags.size()+1);
-            StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", true);
+            StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", isNotGUI);
+            int flagsCorrectioncnt = 0;
             for(int i=0; i<suggested.size(); i++){
                 if(seenDot){
                     //indDotseen = i;
@@ -177,19 +184,36 @@ public class DBinterface {
                             word = resultSet.getString("word");
                             ////System.out.println("Here I am: "+ word);
                             if(i<tokenList.size()){
-                                sfw.appendString(tokenList.get(i) + " -> "+ word);
-                                tokenList.set(i,word);
+                                
+                                if(flagsCorrection.isEmpty()){
+                                    tokenList.set(i,word);
+                                    sfw.appendString(tokenList.get(i) + " -> "+ word);
+                                }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                    tokenList.set(i,word);
+                                    flagsCorrectioncnt++;
+                                }
+                                
                                 
                             }else{
-                                sfw.appendString("IND: "+ i + " -> "+ word);
-                                tokenList.add(word);
+                                if(flagsCorrection.isEmpty()){
+                                    sfw.appendString("IND: "+ i + " -> "+ word);
+                                    tokenList.add(word);
+                                }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                    tokenList.add(word);
+                                    flagsCorrectioncnt++;
+                                }
                             }
                         }
                     }
                 }else if(flags.get(i+delCnt)==2){
                     delCnt++;
-                    sfw.appendString(tokenList.get(i) + " -> X");
-                    tokenList.remove(i);
+                    if(flagsCorrection.isEmpty()){
+                        sfw.appendString(tokenList.get(i) + " -> X");
+                        tokenList.remove(i);
+                    }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                        tokenList.remove(i);
+                        flagsCorrectioncnt++;
+                    }
                 }else if(flags.get(i+delCnt)==3){
                     try (Statement statement = connection.createStatement()) {
                         ////System.out.println(suggested.get(i));
@@ -199,20 +223,31 @@ public class DBinterface {
                         if (resultSet.next()) {
                             word = resultSet.getString("word");
                             ////System.out.println("Here I am: "+ word);
-                            if(i<tokenList.size()){
+                            if(flagsCorrection.isEmpty()){
                                 sfw.appendString("IND: "+ i + " -> "+ word);
-                                tokenList.add(i,word);
-                            }else{
-                                sfw.appendString("IND: "+ i + " -> "+ word);
-                                tokenList.add(word);
+                                if(i<tokenList.size()){
+                                    tokenList.add(i,word);
+                                }else{
+                                    tokenList.add(word);
+                                }
+                            }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                if(i<tokenList.size()){
+                                    tokenList.add(i,word);
+                                }else{
+                                    tokenList.add(word);
+                                }
+                                flagsCorrectioncnt++;
                             }
                         }
                     }
                 }
             }   
             try {
-                sfw.appendString("-----------------------------------------");
-                sfw.writeToFile();
+                if(isNotGUI)
+                    sfw.appendString("-----------------------------------------");
+                if(flagsCorrection.isEmpty()){
+                    sfw.writeToFile();
+                }
             } catch (IOException e) {
                 System.err.println("An error occurred while writing to the file: " + e.getMessage());
             }

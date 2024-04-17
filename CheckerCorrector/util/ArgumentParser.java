@@ -11,6 +11,7 @@ public class ArgumentParser {
     private boolean checkSentence;
     private boolean checkFile;
     private boolean checkGUI;
+    private boolean correctionGUI;
     private boolean updateHashTable;
     private boolean validateUpdates;
 
@@ -21,6 +22,7 @@ public class ArgumentParser {
         updateHashTable = false;
         validateUpdates = false;
         checkGUI = false;
+        correctionGUI = false;
         parseArguments(Arrays.asList(args));
     }
 
@@ -65,6 +67,9 @@ public class ArgumentParser {
                         break;
                     case "--checkGUI":
                         checkGUI = true;
+                        break;
+                    case "--correctionGUI":
+                        correctionGUI = true;
                         break;
                     // Add cases for other arguments here
                     default:
@@ -111,5 +116,8 @@ public class ArgumentParser {
     }
     public boolean isCheckGUI(){
         return checkGUI;
+    }
+    public boolean isCorrectionGUI(){
+        return correctionGUI;
     }
 }
