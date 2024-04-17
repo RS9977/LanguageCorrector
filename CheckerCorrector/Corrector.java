@@ -12,6 +12,7 @@ import util.JsonMaker;
 import util.PhraseExtractor;
 import util.SentenceExtractor;
 import util.StringFileWriter;
+import Translator.DirectTranslator;
 import StateMachine.*;
 
 
@@ -89,15 +90,16 @@ public class Corrector implements GUIListener {
         DBinterface dbInterface = new DBinterface();
         DirectedGraph graph = basicGraphClass.getGraph();
         StringFileWriter stringWriter = StringFileWriter.of("corrected.txt");
-        Corrector corrector = new Corrector(SentenceExtractor.of(argPars.getFileName()));
+        
             
         StringFileWriter.deleteFile("correction_details.txt");
         if(argPars.isCheckFile()){
-            SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
-            List<String> extractedSentences = extractor.getSentences();
             if(argPars.isCorrectionGUI()){    
+                    Corrector corrector = new Corrector(SentenceExtractor.of(argPars.getFileName()));
                     corrector.start();
             }else{
+                SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
+                List<String> extractedSentences = extractor.getSentences();
                 for (String sentence : extractedSentences) {
                     System.out.println("Sentence: " + sentence);
                     String tempString = dbInterface.correctTokenInDatabase(sentence.toLowerCase(), graph, 2, true);
@@ -114,16 +116,44 @@ public class Corrector implements GUIListener {
                 System.err.println("An error occurred while writing to the file: " + e.getMessage());
             }
         }else if(argPars.isCheckSentence()){
-
-            System.out.println("Sentence: " + argPars.getSentence());
-            stringWriter.appendString(dbInterface.correctTokenInDatabase(argPars.getSentence().toLowerCase(), graph, 2, true));
+            if(argPars.isCorrectionGUI()){  
+                Corrector corrector = new Corrector(SentenceExtractor.of(argPars.getSentence()));  
+                corrector.start();
+            }else{
+                System.out.println("Sentence: " + argPars.getSentence());
+                stringWriter.appendString(dbInterface.correctTokenInDatabase(argPars.getSentence().toLowerCase(), graph, 2, true));
+                try {
+                    stringWriter.writeToFile();
+                    System.out.println("Corrected version has been written to the file.");
+                } catch (IOException e) {
+                    System.err.println("An error occurred while writing to the file: " + e.getMessage());
+                }
+                System.out.println("##########################################################");
+            }
+        }else if(argPars.isTranslateDutch()){
+            DirectTranslator directTranslator = DirectTranslator.make();
+            directTranslator.loadWordMapFromFile("SQLite/word_map.txt");
+            if(argPars.isCheckFile()){
+                SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
+                List<String> extractedSentences = extractor.getSentences();
+                for (String sentence : extractedSentences) {
+                    System.out.println("Sentence: " + sentence);
+                    String tempString = directTranslator.replaceWordsInSentence(sentence.toLowerCase());
+                    stringWriter.appendString(tempString);
+                    System.out.println("##########################################################");
+                }
+            }else{
+                
+                System.out.println("Sentence: " + argPars.getSentence());
+                stringWriter.appendString(directTranslator.replaceWordsInSentence(argPars.getSentence().toLowerCase()));
+                System.out.println("##########################################################");
+            }
             try {
                 stringWriter.writeToFile();
                 System.out.println("Corrected version has been written to the file.");
             } catch (IOException e) {
                 System.err.println("An error occurred while writing to the file: " + e.getMessage());
             }
-            System.out.println("##########################################################");
         }
           
     }

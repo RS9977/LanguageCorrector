@@ -14,6 +14,7 @@ public class ArgumentParser {
     private boolean correctionGUI;
     private boolean updateHashTable;
     private boolean validateUpdates;
+    private boolean translateDutch;
 
     ArgumentParser(String[] args) {
         checkSentence = false;
@@ -23,6 +24,7 @@ public class ArgumentParser {
         validateUpdates = false;
         checkGUI = false;
         correctionGUI = false;
+        translateDutch = false;
         parseArguments(Arrays.asList(args));
     }
 
@@ -65,15 +67,18 @@ public class ArgumentParser {
                     case "--validateUpdates":
                         validateUpdates = true;
                         break;
-                    case "--checkGUI":
+                    case "--checkerGUI":
                         checkGUI = true;
                         break;
-                    case "--correctionGUI":
+                    case "--correctorGUI":
                         correctionGUI = true;
+                        break;
+                    case "--translateDutch":
+                        translateDutch = true;
                         break;
                     // Add cases for other arguments here
                     default:
-                        // Handle unknown arguments or simply ignore them
+                        System.out.println("Invalis options. Please use --help to see how to use the tool.");
                         break;
                 }
             }
@@ -87,6 +92,18 @@ public class ArgumentParser {
 
     private void printHelp() {
         System.out.println("Help information:");
+        System.out.println("    Corrector Options:");
+        System.out.println("        --file <filename>: this option should be used if you want to pass your input as file.");
+        System.out.println("        --sentence <sentence>: this option should be used if you want to pass your input as a small sentence.");
+        System.out.println("        --correctorGUI: this option can be used if you want a GUI for the corrector to select between possible suggestions.");
+        System.out.println("        --translateDutch <sentence>: this option should be used if you want to translate from English to Dutch.");
+        System.out.println("    Checker Options:");
+        System.out.println("        --file <filename>: this option should be used if you want to pass your input as file.");
+        System.out.println("        --sentence <sentence>: this option should be used if you want to pass your input as a small sentence.");
+        System.out.println("        --checkerGUI: this option can be used if you want a GUI for the checker to see the highlighted sentences.");
+        System.out.println("        --updateToken: this option should be used alongside a file as input to update new tokens for the database. This option may take hours based on the size of crawled file.");
+        System.out.println("        --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes.");
+        System.out.println("        --validateUpdates: this option can be used to check the correctness of the database for tokens. This will pops up a window.");
         // Add help information here
     }
 
@@ -119,5 +136,8 @@ public class ArgumentParser {
     }
     public boolean isCorrectionGUI(){
         return correctionGUI;
+    }
+    public boolean isTranslateDutch(){
+        return translateDutch;
     }
 }
