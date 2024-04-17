@@ -15,17 +15,21 @@ A high-level description of the implementation, with particular emphasis on the 
 
 ### Implemented Features
 - Provide real-time status and statistics ( e.g., what URL is being processed, rate of processing, size of storage, etc.) feedback for the crawler. [10%]
-    - Description of how it was implemented with an emphasis on data structures and algorithms used
+    - Implemented by calculating statistics as the crawler crawls each page. We report the length of the page processed in bytes, the total amount of data crawled thus far, the number of links extracted from the page, the number of pages crawled, the number of URLs left available to crawl, the current crawling rate in pages per second, the current crawling rate in links extracted per second, and the current crawling rate in bytes per second. Usage: use "--stats" argument for the crawler.  
 - Provide a list of reasonable corrections to a suspicious text, ranked in order of how different they are from the original text. [15%]
     - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Graphical User Interface that highlights suspicious and non-suspicious textual elements in a given text. [15%]
     - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Extend your crawler to crawling social media posts of some large network ( e.g., Twitter, Facebook, LinkedIn, Truth, MeWe…). [15%]
-    - Description of how it was implemented with an emphasis on data structures and algorithms used
+    - Implemented by adding a social media platform as a seed to our crawler. We are using Tumblr as our social media platform. It is considered a major platform with more than 500 million monthly users. Choosing a social media platform was difficult since most platforms no longer allow crawling as a safeguard against their data being used to train LLMs. After careful examination of possible sites, we decided that Tumblr was the best choice that still allowed crawlers. Usage: use "--social" argument for the crawler.
 - Provide a graphical human feedback system for deciding among possible phrase corrections, with feedback into the suspicion levels reported by the system. [15%]
     - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Develop and Android client for your checker. [15%]
     - For the most part, the Android client of the checker is interfacing with the Checker CLI tool to produce its output in a pop-up window on the app. To do this, the Checker tool was modified so that it did not write the checked result to a JSON file (and instead kept it as a JSON string) as well as not require CLI arguments for the script to function. In addition, helper class functions were used to display the output to the user in the app.
+- Extend your system to a language in which none of the team members have fluency. [15% per language, up to 3] - 1x
+    - We added the ability to crawl Dutch websites by adding a Dutch webpage seed to our crawler. Usage: use "--dutchSeed" argument for the crawler. Additional Dutch websites to crawl can be specified by adding their URLs to a file and using the "--file [filename.txt]" argument for the crawler. 
+- Provide a reasonable translation from English to another language based on common language structures. [30%] 
+    - We added the ability to translation from Dutch to English and from English to Dutch. We accomplished this by crawling a Dutch to English online dictionary and translating the words literally. Usage: use ""--dutchDict" argument with crawler to re-crawl the dictionary. 
 
 #### Changed Features from Initial Defense Report
 
@@ -44,7 +48,7 @@ https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 - Folder with All testing Code:
 
 ## Work Breakdown
-Webcrawler by Alex Melnick 
+Webcrawler, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial) by Alex Melnick 
 
 Data Parser, Android App by Michael Harkess
 
