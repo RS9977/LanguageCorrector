@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# Compile the Java program
+# Compiling Java program
+echo "Compiling ScratchCrawler..."
 javac ScratchCrawler.java
 
-# Run the Java program with the passed arguments
-echo "Running ScratchCrawler with arguments:"
-echo "$@"
-java ScratchCrawler "$@"
+# Checking if compilation was successful
+if [ $? -eq 0 ]; then
+    echo "Compilation successful. Running ScratchCrawler with arguments: $@"
+    java ScratchCrawler "$@"
+else
+    echo "Compilation failed."
+    exit 1
+fi
