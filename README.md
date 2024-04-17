@@ -11,18 +11,27 @@ Michael Harkess
 Reza Sajjadi
 
 ### Implementation Description
+A high-level description of the implementation, with particular emphasis on the design decisions related to data structures and algorithms
 
 ### Implemented Features
 - Provide real-time status and statistics ( e.g., what URL is being processed, rate of processing, size of storage, etc.) feedback for the crawler. [10%]
-    - IMPLEMENTATION DESCRIPTION
+    - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Provide a list of reasonable corrections to a suspicious text, ranked in order of how different they are from the original text. [15%]
-    - IMPLEMENTATION DESCRIPTION
+    - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Graphical User Interface that highlights suspicious and non-suspicious textual elements in a given text. [15%]
-    - IMPLEMENTATION DESCRIPTION
+    - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Provide a graphical human feedback system for deciding among possible phrase corrections, with feedback into the suspicion levels reported by the system. [15%]
-    - IMPLEMENTATION DESCRIPTION
+    - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Develop and Android client for your checker. [15%]
     - For the most part, the Android client of the checker is interfacing with the Checker CLI tool to produce its output in a pop-up window on the app. To do this, the Checker tool was modified so that it did not write the checked result to a JSON file (and instead kept it as a JSON string) as well as not require CLI arguments for the script to function. In addition, helper class functions were used to display the output to the user in the app.
+
+#### Changed Features from Initial Defense Report
+
+##### Added
+- Feature 1
+
+##### Removed
+- Feature 1
 
 ### References
 https://docs.oracle.com/javase/tutorial/networking/urls/index.html
@@ -62,4 +71,4 @@ The correction at this point is limited to the state machine complexity, but it 
 ### Known Issues/Bugs
 #### Android App
 - If a dialog box pops up and the device/screen is rotated, then the app will unexpectedly crash
-- The confidence score of every word in a given sentence is 0
+- The confidence score of every word in a given sentence/phrase is 0

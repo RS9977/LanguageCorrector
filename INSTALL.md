@@ -36,4 +36,9 @@ To run the webcrawler, run `./crawler --file [PATH]`. Alternatively, `java Scrat
 To build the project for CheckerCorrector we are using a make file. Running `make dev_corrector` and `make dev_checker` will compile and build the `checker.jar` and `corrector.jar` with the user interface requested, and and bash script ready to be run them as `./checker --file [PATH]` and `./corrector --file [PATH]`.
 
 ## Android App
-The Android App is designed to work on any android device that supports Android 10 and above. For simple installation, an apk file of the app is provided in the repo. Make sure to enable `Install from Unknown Sources` before installing the apk on your device as it may be blocked during the installation process.
+The Android App is designed to work on any android device that supports Android 10 and above. For simple installation, an apk file of the app is provided in the repo. Make sure to enable `Install from Unknown Sources` before installing the apk on your device as it may be blocked during the installation process. 
+
+The following are the controls for the app once launched:
+- `+` Button: Add a new sentence/Phrase to store in a visual list.
+- Short Press on a Phrase: Brings up a dialog showing the output of the checker on the tapped phrase/sentence.
+- Long Press on a Phrase: Brings up a dialog to delete the phrase from the stored list.
