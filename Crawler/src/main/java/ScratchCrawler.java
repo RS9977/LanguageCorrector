@@ -456,6 +456,12 @@ public class ScratchCrawler {
                     crawler.pagesToVisit.add("https://travelwithlanguages.com/blog/most-common-dutch-words.html");
                     startCrawl = true;
                     break;
+                case "--turkish":
+                    //  Extend your system to a language in which none of the team members have fluency
+                    // Adds a Turkish website as a seed URL
+                    crawler.pagesToVisit.add("https://eksisozluk.com/");
+                    startCrawl = true;
+                    break;
                 case "--xl":
                     // Allows our crawler to save 1 MB of data per page instead of 1 KB
                     max_storage = 1000000; // 1 million bytes (1 MB)
@@ -469,6 +475,7 @@ public class ScratchCrawler {
                     System.out.println("--stats: Print statistics during crawling");
                     System.out.println("--social: Include crawling from Tumblr social media platform");
                     System.out.println("--dutch: Include crawling from Dutch translation website");
+                    System.out.println("--turkish: Include crawling from Turkish website");
                     System.out.println("--xl: Increase the storage size per page to 1 MB");
                     System.out.println("--help: Display this help message");
                     break;
