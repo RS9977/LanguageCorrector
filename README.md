@@ -20,6 +20,8 @@ A high-level description of the implementation, with particular emphasis on the 
     - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Graphical User Interface that highlights suspicious and non-suspicious textual elements in a given text. [15%]
     - Description of how it was implemented with an emphasis on data structures and algorithms used
+- Extend your crawler to crawling social media posts of some large network ( e.g., Twitter, Facebook, LinkedIn, Truth, MeWe…). [15%]
+    - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Provide a graphical human feedback system for deciding among possible phrase corrections, with feedback into the suspicion levels reported by the system. [15%]
     - Description of how it was implemented with an emphasis on data structures and algorithms used
 - Develop and Android client for your checker. [15%]
