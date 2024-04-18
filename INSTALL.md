@@ -20,8 +20,27 @@ This is provided in the repo, and there is no need to download the library exter
 This is provided in the repo, and there is no need to download the library externally. This is used for communicating with SQLite databases.
 
 ## Example Usage
-- Examples of how to use your project
-    - Several clear examples the illustrate the main features of your project.
+- Examples of how to use our project
+### Checker/Corrector
+```
+    Corrector:
+        `./corrector --file "filename.txt"` -> This will dump the corrected sentence for English of the specidied file to `corrected.txt`
+        `./corrector  --sentence "I am a book." -> This will dump the corrected sentence for English of the specidied sentence to `corrected.txt`
+        `./corrector --correctorGUI ` -> This will run a GUI where you can see what are the suggestions and choose between them.
+        `./corrector --correctorGUI --dutch` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch.
+        `./corrector --translateToDutch --file "filename.txt"` -> This will translate the english text in the file to dutch and put it in `corrected.txt`
+
+    Checker:
+        `./checker --file "filename.txt"` -> This will dump the confidence score for English of the specidied file to `confidence_ourChecker.json`
+        `./checker --sentence "I am a book." -> This will dump the confidence score for the specidied file to `confidence_ourChecker.json`
+        `./checker --checkerGUI ` -> This will run an interactive GUI where you can type and by pushing the buttom it will tell you the confidence.
+        `./checker --checkerGUI --dutch` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch.
+        `./checker --updateToken --file "SQLite/output_Boston.txt"` This will run update the database for tokens which takes a long time.
+        `./checker --updateTokenFromDic --file "SQLite/DutchTranslation.txt"` This will run update the database for tokens directly from a parsed dictionary from the crawler. The format should be as it can be seen for any other file.
+        `./checker --updateHashTable --file "SQLite/output_Boston.txt"` This will run update the database for n-grams weights.
+        `./checker --validateUpdates --file "SQLite/token_database_english_updated.db"` This will run a GUI which will go through the database and check with the user if the updated tokens have a correct role.
+```
+    
 ## Testing Patterns
 - Descriptions of testing patterns, and instructions on how to exercise them:
     - unit tests
@@ -61,7 +80,7 @@ Usage:
     Checker Options:
         --file <filename>: this option should be used if you want to pass your input as file.
         -sentence <sentence>: this option should be used if you want to pass your input as a small sentence.
-        --checkerGUI: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.
+        --: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.
         --updateToken: this option should be used alongside a file as input to update new tokens for the database from the crawled data. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.
         --updateTokenFromDic: this option should be used alongside a file as input to update new tokens for the database from the crawled data from a dictionary website. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.
         --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes. You must use --file <filename.txt> which has the crawled data for this option as well.
@@ -76,3 +95,4 @@ The following are the controls for the app once launched:
 - `+` Button: Add a new sentence/Phrase to store in a visual list.
 - Short Press on a Phrase: Brings up a dialog showing the output of the checker on the tapped phrase/sentence.
 - Long Press on a Phrase: Brings up a dialog to delete the phrase from the stored list.
+checkerGUI
