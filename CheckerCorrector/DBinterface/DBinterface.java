@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.io.IOException;
+import java.util.Map;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import DirectedGraph.DirectedGraph;
 
@@ -18,15 +21,21 @@ import util.StringProcessor;
 import GUI.SelectCorrectionHandler;
 
 public class DBinterface {
+    String url;
+    String dicFileName;
+    public DBinterface(String url, String dicFileName){
+        this.url = "jdbc:sqlite:./"+url;
+        this.dicFileName = dicFileName;
+    }
     public int checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
-        String url = "jdbc:sqlite:./SQLite/mydatabase.db";
-        String dicFileName = "./SQLite/smallDic.txt";
-        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        //String url = "jdbc:sqlite:./SQLite/mydatabase.db";
+        //String dicFileName = "./SQLite/smallDic.txt";
+        TypoCorrector typoChecker =  TypoCorrector.of(this.dicFileName);
         int initialConf = 0;
-        try (Connection connection = DriverManager.getConnection(url)) {
+        try (Connection connection = DriverManager.getConnection(this.url)) {
 
             // Lookup each token in the database and categorize it
             for (int i = 0; i < tokens.length; i++) {
@@ -112,14 +121,14 @@ public class DBinterface {
         String[] tokens = sentence.split("\\s+");
         String[] tokensCopy = tokens.clone();
         List<String> tokenList = new ArrayList<>(Arrays.asList(tokensCopy));
-        String url = "jdbc:sqlite:./SQLite/mydatabase.db";
-        String dicFileName = "./SQLite/smallDic.txt";
-        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        //String url = "jdbc:sqlite:./SQLite/mydatabase.db";
+        //this.dicFileName = "./SQLite/smallDic.txt";
+        TypoCorrector typoChecker =  TypoCorrector.of(this.dicFileName);
         int initialConf = 0;
         int flagsCorrectioncnt = 0;
         boolean flagTypoCorrectionAccepted = true;
         StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", isNotGUI);
-        try (Connection connection = DriverManager.getConnection(url)) {
+        try (Connection connection = DriverManager.getConnection(this.url)) {
 
             // Lookup each token in the database and categorize it
             for (int i = 0; i < tokens.length; i++) {
@@ -330,9 +339,9 @@ public class DBinterface {
         List<String> tokenList = new ArrayList<>(Arrays.asList(tokensCopy));
         //String url       = "jdbc:sqlite:./SQLite/mydatabase.db";
         //String urlinsert = "jdbc:sqlite:./SQLite/newdatabase.db";
-        String dicFileName = "./SQLite/smallDic.txt";
+        //String dicFileName = "./SQLite/smallDic.txt";
         //String url = "jdbc:sqlite:./SQLite/newdatabase.db";
-        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        TypoCorrector typoChecker =  TypoCorrector.of(this.dicFileName);
         int initialConf = 0;
         int cntMiss = 0;
             // Lookup each token in the database and categorize it
@@ -418,10 +427,57 @@ public class DBinterface {
 
     private HashMap<String, String> wordRolesMap;
 
+    public void updateTokenTableFromDic(String urlS, String filePath, Boolean isDutch) {
+        // System.out.println("filePath");
+         HashMap<String, String> wordMap = new HashMap<>();
+         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+             
+             String line;
+             if(isDutch){
+                while ((line = br.readLine()) != null) {
+                    String[] words = line.split("\\s+");
+                    if (words.length > 2) {
+                        wordMap.put(words[0], words[1]);
+                    }
+                }
+             }else{
+                while ((line = br.readLine()) != null) {
+                    String[] words = line.split("\\s+");
+                    if (words.length > 2) {
+                        if(words[2].equals("to") && words.length>3){
+                            wordMap.put(words[3], words[1]);
+                        }else{
+                            wordMap.put(words[2], words[1]);
+                        }
+                    }
+                }
+             }
+             wordRolesMap = mixHashMaps(wordMap, wordRolesMap);
+             updateDatabase(urlS);
+         //    System.out.println(wordMap.size());
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+     }
+     public HashMap<String, String> mixHashMaps(HashMap<String, String> map1, HashMap<String, String> map2) {
+        HashMap<String, String> mergedMap = new HashMap<>();
+        for (Map.Entry<String, String> entry : map1.entrySet()) {
+            mergedMap.put(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<String, String> entry : map2.entrySet()) {
+            if (mergedMap.containsKey(entry.getKey())) {
+                mergedMap.put(entry.getKey(), entry.getValue());
+            } else {
+                mergedMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return mergedMap;
+    }
     // Method to read data from SQLite database into HashMap
     public void readDataFromDatabase() {
         wordRolesMap = new HashMap<>();
-        String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
+        String dbUrl = this.url;//SQLite/newdatabase.db";
         try (Connection connection = DriverManager.getConnection(dbUrl)) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM word_roles");
@@ -438,8 +494,9 @@ public class DBinterface {
     }
 
     // Method to update SQLite database with updated HashMap
-    public void updateDatabase() {
-        String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
+    public void updateDatabase(String urlS) {
+        String dbUrl = "jdbc:sqlite:./"+urlS;
+        //String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
         try (Connection connection = DriverManager.getConnection(dbUrl)) {
             // Clear existing data in the table
             Statement clearStatement = connection.createStatement();
@@ -447,6 +504,7 @@ public class DBinterface {
 
             // Insert updated data from HashMap into the table
             PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO word_roles (word, role) VALUES (?, ?)");
+           
             for (String word : wordRolesMap.keySet()) {
                 String role = wordRolesMap.get(word);
                 insertStatement.setString(1, word);
