@@ -52,7 +52,7 @@ public class HighlighterGUI extends JFrame {
     private List<String> extractPhrases(String text, int phraseLength) {
         List<String> phrases = new ArrayList<>();
         String[] words = text.split("\\s+");
-        for (int i = 0; i <= words.length - phraseLength; i++) {
+        for (int i = 0; i <= words.length - phraseLength; i+=phraseLength) {
             StringBuilder phraseBuilder = new StringBuilder();
             for (int j = 0; j < phraseLength; j++) {
                 phraseBuilder.append(words[i + j]);
