@@ -67,9 +67,9 @@ https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 - Folder with All testing Code:
 
 ## Work Breakdown
-Webcrawler, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial) by Alex Melnick 
+Webcrawler, Data Parser, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial) by Alex Melnick 
 
-Data Parser, Android App by Michael Harkess
+Android App by Michael Harkess
 
 Language checker and corrector by Reza Sajjadi
 
