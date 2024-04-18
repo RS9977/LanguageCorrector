@@ -12,7 +12,7 @@ public class HashTableMaker {
     private Connection connection;
 
     public HashTableMaker(String dbName) throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:SQLite/hash_database.db"+dbName);
+        connection = DriverManager.getConnection("jdbc:sqlite:./"+dbName);
         createTableIfNotExists();
     }
 
