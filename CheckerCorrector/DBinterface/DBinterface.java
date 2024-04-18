@@ -18,15 +18,21 @@ import util.StringProcessor;
 import GUI.SelectCorrectionHandler;
 
 public class DBinterface {
+    String url;
+    String dicFileName;
+    public DBinterface(String url, String dicFileName){
+        this.url = "jdbc:sqlite:./"+url;
+        this.dicFileName = dicFileName;
+    }
     public int checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
         StateMachine SM = new StateMachine();
         sentence = sentence.replaceAll("\\p{Punct}", " $0");
         String[] tokens = sentence.split("\\s+");
-        String url = "jdbc:sqlite:./SQLite/mydatabase.db";
-        String dicFileName = "./SQLite/smallDic.txt";
-        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        //String url = "jdbc:sqlite:./SQLite/mydatabase.db";
+        //String dicFileName = "./SQLite/smallDic.txt";
+        TypoCorrector typoChecker =  TypoCorrector.of(this.dicFileName);
         int initialConf = 0;
-        try (Connection connection = DriverManager.getConnection(url)) {
+        try (Connection connection = DriverManager.getConnection(this.url)) {
 
             // Lookup each token in the database and categorize it
             for (int i = 0; i < tokens.length; i++) {
@@ -112,14 +118,14 @@ public class DBinterface {
         String[] tokens = sentence.split("\\s+");
         String[] tokensCopy = tokens.clone();
         List<String> tokenList = new ArrayList<>(Arrays.asList(tokensCopy));
-        String url = "jdbc:sqlite:./SQLite/mydatabase.db";
-        String dicFileName = "./SQLite/smallDic.txt";
-        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        //String url = "jdbc:sqlite:./SQLite/mydatabase.db";
+        //this.dicFileName = "./SQLite/smallDic.txt";
+        TypoCorrector typoChecker =  TypoCorrector.of(this.dicFileName);
         int initialConf = 0;
         int flagsCorrectioncnt = 0;
         boolean flagTypoCorrectionAccepted = true;
         StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", isNotGUI);
-        try (Connection connection = DriverManager.getConnection(url)) {
+        try (Connection connection = DriverManager.getConnection(this.url)) {
 
             // Lookup each token in the database and categorize it
             for (int i = 0; i < tokens.length; i++) {
@@ -330,9 +336,9 @@ public class DBinterface {
         List<String> tokenList = new ArrayList<>(Arrays.asList(tokensCopy));
         //String url       = "jdbc:sqlite:./SQLite/mydatabase.db";
         //String urlinsert = "jdbc:sqlite:./SQLite/newdatabase.db";
-        String dicFileName = "./SQLite/smallDic.txt";
+        //String dicFileName = "./SQLite/smallDic.txt";
         //String url = "jdbc:sqlite:./SQLite/newdatabase.db";
-        TypoCorrector typoChecker =  TypoCorrector.of(dicFileName);
+        TypoCorrector typoChecker =  TypoCorrector.of(this.dicFileName);
         int initialConf = 0;
         int cntMiss = 0;
             // Lookup each token in the database and categorize it
@@ -421,7 +427,7 @@ public class DBinterface {
     // Method to read data from SQLite database into HashMap
     public void readDataFromDatabase() {
         wordRolesMap = new HashMap<>();
-        String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
+        String dbUrl = "jdbc:sqlite:./"+this.url;//SQLite/newdatabase.db";
         try (Connection connection = DriverManager.getConnection(dbUrl)) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM word_roles");
@@ -438,8 +444,9 @@ public class DBinterface {
     }
 
     // Method to update SQLite database with updated HashMap
-    public void updateDatabase() {
-        String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
+    public void updateDatabase(String urlS) {
+        String dbUrl = "jdbc:sqlite:./"+urlS;
+        //String dbUrl = "jdbc:sqlite:./SQLite/newdatabase.db";
         try (Connection connection = DriverManager.getConnection(dbUrl)) {
             // Clear existing data in the table
             Statement clearStatement = connection.createStatement();

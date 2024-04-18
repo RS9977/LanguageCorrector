@@ -56,11 +56,12 @@ public class TypoCorrector {
                 if(removeDot)
                     line = line.replaceAll("[^a-zA-Z ]", "").toLowerCase(); // Remove non-alphabetic characters and convert to lowercase
                 String[] words = line.split("\\s+"); // Split the line by spaces
-                for (String word : words) {
+                dic.add(words[0]);
+                /*for (String word : words) {
                     if (!word.isEmpty()) {
                         dic.add(word); // Add the word to the dictionary
                     }
-                }
+                }*/
             }
         } catch (IOException e) {
             e.printStackTrace();

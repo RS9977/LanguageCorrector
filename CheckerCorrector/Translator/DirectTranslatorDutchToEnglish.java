@@ -6,27 +6,34 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DirectTranslator {
+public class DirectTranslatorDutchToEnglish {
 
     private Map<String, String> wordMap;
 
-    private DirectTranslator() {
+    private DirectTranslatorDutchToEnglish() {
         wordMap = new HashMap<>();
     }
 
-    public static DirectTranslator make(){
-        return new DirectTranslator();
+    public static DirectTranslatorDutchToEnglish make(){
+        return new DirectTranslatorDutchToEnglish();
     }
 
     public void loadWordMapFromFile(String filePath) {
+       // System.out.println("filePath");
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            
             String line;
             while ((line = br.readLine()) != null) {
                 String[] words = line.split("\\s+");
-                if (words.length == 2) {
-                    wordMap.put(words[0], words[1]);
+                if (words.length > 2) {
+                    if(words[2].equals("to") && words.length>3){
+                        wordMap.put(words[0], words[3]);
+                    }else{
+                        wordMap.put(words[0], words[2]);
+                    }
                 }
             }
+        //    System.out.println(wordMap.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -44,15 +51,5 @@ public class DirectTranslator {
         }
         // Remove extra space at the end and ensure no space before punctuation
         return replacedSentence.toString().trim().replaceAll("\\s(?=\\p{Punct})", "");
-    }
-
-    public static void main(String[] args) {
-        DirectTranslator wordReplacement = new DirectTranslator();
-        wordReplacement.loadWordMapFromFile("SQLite/word_map.txt");
-
-        String sentence = "aa, bb! cc dd, ee? ff.";
-        String replacedSentence = wordReplacement.replaceWordsInSentence(sentence);
-        System.out.println("Original sentence: " + sentence);
-        System.out.println("Replaced sentence: " + replacedSentence);
     }
 }

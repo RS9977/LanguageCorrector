@@ -1,13 +1,13 @@
 package StateMachine;
 
 public enum  State {
-        START,      // Initial state
-        PRONOUN,    // State for processing a pronoun token
-        ARTICLE,    // State for article
-        VERB,       // State for processing a verb token
+        START,      
+        PRONOUN,    
+        ARTICLE,    
+        VERB,       
         IS,
-        ADJECTIVE,   // State for processing an adjective token
-        NOUN,   // State for processing a noun
+        ADJECTIVE,   
+        NOUN,   
         ADVERB,
         DOT,
         CONJ,
@@ -19,7 +19,7 @@ public enum  State {
         NOT,
         PREPOS,
         DOES,
-        NAN;   // State for processing a noun
+        NAN;   
 
         @Override
         public String toString() {
