@@ -8,6 +8,7 @@ public class ArgumentParser {
     private String sentence;
     private String fileName;
     private boolean updateToken;
+    private boolean updateTokenFromDic;
     private boolean checkSentence;
     private boolean checkFile;
     private boolean checkGUI;
@@ -21,6 +22,7 @@ public class ArgumentParser {
     ArgumentParser(String[] args) {
         checkSentence = false;
         updateToken = false;
+        updateTokenFromDic = false;
         checkFile  = false;
         updateHashTable = false;
         validateUpdates = false;
@@ -86,6 +88,9 @@ public class ArgumentParser {
                     case "--dutch":
                         dutch = true;
                         break;
+                    case "--updateTokenFromDic":
+                        updateTokenFromDic = true;
+                        break;
                     // Add cases for other arguments here
                     default:
                         System.out.println("Invalis options. Please use --help to see how to use the tool.");
@@ -113,7 +118,8 @@ public class ArgumentParser {
         System.out.println("        --file <filename>: this option should be used if you want to pass your input as file.");
         System.out.println("        --sentence <sentence>: this option should be used if you want to pass your input as a small sentence.");
         System.out.println("        --checkerGUI: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.");
-        System.out.println("        --updateToken: this option should be used alongside a file as input to update new tokens for the database. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.");
+        System.out.println("        --updateToken: this option should be used alongside a file as input to update new tokens for the database from the crawled data. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.");
+        System.out.println("        --updateTokenFromDic: this option should be used alongside a file as input to update new tokens for the database from the crawled data from a dictionary website. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.");
         System.out.println("        --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes. You must use --file <filename.txt> which has the crawled data for this option as well.");
         System.out.println("        --validateUpdates: this option can be used to check the correctness of the database for tokens. This will pops up a window. You must use --file <dbname.db> for this option as well.");
         System.out.println("        --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.");
@@ -158,5 +164,8 @@ public class ArgumentParser {
     }
     public boolean isDutch(){
         return dutch;
+    }
+    public boolean isUpdateTokenFromDic(){
+        return updateTokenFromDic;
     }
 }

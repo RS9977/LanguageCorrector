@@ -42,6 +42,14 @@ public class Checker {
                     new WordRoleUpdater(dbName);
                 }
             });
+        }else if(argPars.isUpdateTokenFromDic()){
+            dbInterface.readDataFromDatabase();
+            if(argPars.isDutch()){
+                dbInterface.updateTokenTableFromDic("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt", true);
+            }else{
+                dbInterface.updateTokenTableFromDic("SQLite/token_database_english.db", "SQLite/DutchTranslation.txt", false);
+            }
+            
         }else if(argPars.isUpdateToken()){
             dbInterface.readDataFromDatabase();
             if(argPars.isCheckFile()){
