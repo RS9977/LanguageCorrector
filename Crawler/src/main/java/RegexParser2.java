@@ -16,7 +16,7 @@ public class RegexParser2 {
         FileInputStream inputStream = new FileInputStream(file);
             String all_text = IOUtils.toString(inputStream);
             sentences = findSentences(all_text);
-            links = extractLinks(all_text);
+            //links = extractLinks(all_text);
             writeToFile(sentences,links,"output_"+"Dutch2.txt");
     }
 
