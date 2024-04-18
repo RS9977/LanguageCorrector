@@ -86,8 +86,12 @@ public class Checker {
                 List<String> extractedSentences = extractor.getSentences();  
                 
                 try {
-                    
-                    HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
+                    HashTableMaker manager;
+                    if(argPars.isDutch()){
+                        manager = new HashTableMaker("SQLite/hash_database_dutch.db");
+                    }else{
+                        manager = new HashTableMaker("SQLite/hash_database_english.db");
+                    }
                     for (String sentence : extractedSentences) {
                         manager.updateDatabase(sentence.toLowerCase());
                         PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 1, 4);
