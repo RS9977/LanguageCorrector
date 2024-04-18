@@ -40,11 +40,6 @@ This is provided in the repo, and there is no need to download the library exter
         `./checker --updateHashTable --file "SQLite/output_Boston.txt"` This will run update the database for n-grams weights.
         `./checker --validateUpdates --file "SQLite/token_database_english_updated.db"` This will run a GUI which will go through the database and check with the user if the updated tokens have a correct role.
 ```
-    
-## Testing Patterns
-- Descriptions of testing patterns, and instructions on how to exercise them:
-    - unit tests
-    - system tests
 
 # Execution
 
