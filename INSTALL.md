@@ -6,7 +6,7 @@
 All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run. These modules were developed with Unix in mind, and is not guaranteed to work on other OS systems such as Windows or MacOS.
 
 ## Android App 
-When running the android app, the minimum required OS needed to start the app is Android 10.
+When running the android app, the minimum required OS needed to start the app is Android 10 and requires at least 25MB of space.
 
 # Supporting files
 ## Non-Standard Libraries
@@ -87,6 +87,8 @@ Usage:
         --validateUpdates: this option can be used to check the correctness of the database for tokens. This will pops up a window. You must use --file <dbname.db> for this option as well.
         --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.
 ```
+## Regex Parser
+To run the parser, you will need a file to parse (ideally a text file) and you will need to edit the code so that the `file` variable in the main function is the absolute path of the file to be parsed. You can run the file in an IDE (or via the command line) in order to start parsing. The parsed sentences will output to a file beginning with `2-` as the code removes any empty lines from the output file by making a duplicate file.
 
 ## Android App
 The Android App is designed to work on any android device that supports Android 10 and above. For simple installation, an apk file of the app is provided in the repo. Make sure to enable `Install from Unknown Sources` before installing the apk on your device as it may be blocked during the installation process. 
