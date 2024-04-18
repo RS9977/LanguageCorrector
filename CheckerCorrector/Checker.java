@@ -20,7 +20,12 @@ public class Checker {
         
         ArgumentParser argPars = ArgumentParser.of(args);
         BasicGraph basicGraphClass = new BasicGraph();
-        DBinterface dbInterface = new DBinterface();
+        DBinterface dbInterface;
+        if(!argPars.isDutch()){
+            dbInterface = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt");
+        }else{
+            dbInterface = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt");
+        }
         DirectedGraph<State> graph = basicGraphClass.getGraph();
         JsonMaker jsonMaker = JsonMaker.create();
 
@@ -29,13 +34,22 @@ public class Checker {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    String dbName = "SQLite/newdatabase.db";
+
+                    String dbName = "SQLite/token_database_english_updated.db";
                     if(argPars.isCheckFile()){
                         dbName = argPars.getFileName();
                     }
                     new WordRoleUpdater(dbName);
                 }
             });
+        }else if(argPars.isUpdateTokenFromDic()){
+            dbInterface.readDataFromDatabase();
+            if(argPars.isDutch()){
+                dbInterface.updateTokenTableFromDic("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt", true);
+            }else{
+                dbInterface.updateTokenTableFromDic("SQLite/token_database_english.db", "SQLite/DutchTranslation.txt", false);
+            }
+            
         }else if(argPars.isUpdateToken()){
             dbInterface.readDataFromDatabase();
             if(argPars.isCheckFile()){
@@ -61,14 +75,19 @@ public class Checker {
                     dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
                 }
             }
-            dbInterface.updateDatabase();
+            if(argPars.isDutch()){
+                dbInterface.updateDatabase("SQLite/token_database_dutch_updated.db");
+            }else{
+                dbInterface.updateDatabase("SQLite/token_database_english_updated.db");
+            }
         }else if(argPars.isUpdateHashTable()){
             if(argPars.isCheckFile()){
                 SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
                 List<String> extractedSentences = extractor.getSentences();  
                 
                 try {
-                    HashTableMaker manager = new HashTableMaker();
+                    
+                    HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
                     for (String sentence : extractedSentences) {
                         manager.updateDatabase(sentence.toLowerCase());
                         PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 1, 4);
@@ -83,7 +102,7 @@ public class Checker {
                 }
             }else if(argPars.isCheckSentence()){
                 try {
-                    HashTableMaker manager = new HashTableMaker();
+                    HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
                     manager.updateDatabase(argPars.getSentence().toLowerCase());
                     for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),1, 4).getPhrases()) {
                         manager.updateDatabase(phrase.toLowerCase());                      
@@ -97,7 +116,7 @@ public class Checker {
             SentenceExtractor extractor = SentenceExtractor.of(argPars.getFileName());
             List<String> extractedSentences = extractor.getSentences();  
             try {
-                HashTableMaker manager = new HashTableMaker();
+                HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
                 for (String sentence : extractedSentences) {
                     System.out.println("Sentence: " + sentence);
                     
@@ -143,7 +162,7 @@ public class Checker {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    new HighlighterGUI();
+                    new HighlighterGUI(argPars.isDutch());
                 }
             });
         }

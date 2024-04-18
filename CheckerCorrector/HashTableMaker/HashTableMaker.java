@@ -11,8 +11,8 @@ import util.PhraseExtractor;
 public class HashTableMaker {
     private Connection connection;
 
-    public HashTableMaker() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:SQLite/hash_database.db");
+    public HashTableMaker(String dbName) throws SQLException {
+        connection = DriverManager.getConnection("jdbc:sqlite:SQLite/hash_database.db"+dbName);
         createTableIfNotExists();
     }
 

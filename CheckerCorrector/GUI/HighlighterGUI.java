@@ -16,8 +16,9 @@ import java.util.Random;
 public class HighlighterGUI extends JFrame {
     private JTextArea textArea;
     private JButton highlightButton;
-
-    public HighlighterGUI() {
+    public boolean isDutch;
+    public HighlighterGUI(boolean isDutch) {
+        this.isDutch = isDutch;
         setTitle("Text Highlighter");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -51,7 +52,7 @@ public class HighlighterGUI extends JFrame {
     private List<String> extractPhrases(String text, int phraseLength) {
         List<String> phrases = new ArrayList<>();
         String[] words = text.split("\\s+");
-        for (int i = 0; i <= words.length - phraseLength; i++) {
+        for (int i = 0; i <= words.length - phraseLength; i+=phraseLength) {
             StringBuilder phraseBuilder = new StringBuilder();
             for (int j = 0; j < phraseLength; j++) {
                 phraseBuilder.append(words[i + j]);
@@ -65,7 +66,12 @@ public class HighlighterGUI extends JFrame {
     }
 
     private void highlightPhrases(List<String> phrases) {
-        DBinterface dbInterface = new DBinterface();
+        DBinterface dbInterface;
+        if(!this.isDutch){
+            dbInterface = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt");
+        }else{
+            dbInterface = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt");
+        }
         BasicGraph basicGraphClass = new BasicGraph();
         for (String phrase : phrases) {
             highlightPhrase(phrase, dbInterface.checkTokenInDatabase(phrase, basicGraphClass.getGraph()));
@@ -89,14 +95,5 @@ public class HighlighterGUI extends JFrame {
             }
             index = text.indexOf(phrase, index + 1);
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new HighlighterGUI();
-            }
-        });
     }
 }
