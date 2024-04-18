@@ -1,2 +1,2 @@
-#!/bin/bash 
-java -jar ScratchCrawler.jar "$@" 
+#!/bin/bash
+java -jar ScratchCrawler.jar "$@"
