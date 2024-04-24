@@ -6,7 +6,10 @@
 All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run. These modules were developed with Unix in mind, and is not guaranteed to work on other OS systems such as Windows or MacOS.
 
 ## Android App 
-When running the android app, the minimum required OS needed to start the app is Android 10 and requires at least 25MB of space.
+When running the android app, the minimum required OS needed to start the app is Android 10. If running in Android Studio, you can clone the repo and then create a new device in the 
+emulator. To do this, you will need to Tools -> Device Manager -> Create New Virtual Device (Shows up as a '+' symbol in the device manager window.). You can choose any
+device definition, but for reference I tested the app on the Pixel 8 device definition. Then select the OS version of the emulator (min. Android 10) then select the 'Portrait' Orientation. Then
+start the device in the Device Manager menu. Then to install the provided apk to the device, you can drag and drop the file into the emulator.
 
 # Supporting files
 ## Non-Standard Libraries
