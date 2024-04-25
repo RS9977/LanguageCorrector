@@ -47,7 +47,7 @@ This is provided in the repo, and there is no need to download the library exter
 # Execution
 
 ## Crawler
-To run the webcrawler, run `./crawler` in the /Crawler/ directory. The usage is as follows. Any number of arguments are allowed. 
+To run the webcrawler, run `./crawler [args]` in the /Crawler/ directory on a linux system. On Windows, run `make` in the /Crawler/src/main/java/ folder, then run `java ScratchCrawler.java [args]`. The usage is as follows. Any number of arguments are allowed. NOTES: Running the crawler *without* the --stats flag will not show any output until the crawler is finished crawling (typically ~100 seconds). Running the crawler *without* the --xl flag may often times run out of URLs to crawl before the crawling limit of 100 URLs is reached.   
 ```
 Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]
     --file <file_path>: Read URLs from a file and start crawling. The file should be placed in the /Crawler/ directory
