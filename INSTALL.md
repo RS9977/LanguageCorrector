@@ -22,6 +22,8 @@ This is provided in the repo, and there is no need to download the library exter
 ### Simple Logging Facade for Java (SLF4J)
 This is provided in the repo, and there is no need to download the library externally. This is used for communicating with SQLite databases.
 
+### Apache Tika
+This is provided in the repo, and there is no need to download the library externally. This is used to read in files for parsing.
 ## Example Usage
 - Examples of how to use our project
 ### Checker/Corrector
