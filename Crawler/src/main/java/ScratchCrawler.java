@@ -353,23 +353,6 @@ public class ScratchCrawler {
         return domain; // Return the domain
     }
 
-    // Unused in this version of the crawler
-    // public void crawl(String seed) {
-    //     pagesToVisit.add(seed); // Add the seed page to pagesToVisit
-
-    //     while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
-    //         String nextPage = getNextPage(); // Get the next page
-    //         try {
-    //             Thread.sleep(waitTime); // Wait to be polite
-    //             getPage(nextPage); // Get the page
-    //         } catch (InterruptedException e) {
-    //             System.out.println("Error waiting between crawling pages.");
-    //             e.printStackTrace();
-    //         } 
-    //     }
-
-    //     System.out.println("Crawling complete."); // Print message
-    // }
     public void crawl() {
         if (crawlingDutch) {
             crawlDutchDict(); // Crawl the Dutch translation website
@@ -530,7 +513,6 @@ public class ScratchCrawler {
                 System.out.println("Processing rate in pages per second: " + processingRatePages);
                 System.out.println("Processing rate in bytes per second: " + processingRateSize);
             }
-           
 
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -623,7 +605,7 @@ public class ScratchCrawler {
                 case "--dutchSeed":
                     //  Extend your system to a language in which none of the team members have fluency
                     // Adds a Dutch website as a seed URL
-                    crawler.pagesToVisit.add("https://www.rijksmuseum.nl/");
+                    crawler.pagesToVisit.add("https://www.telegraaf.nl/");
                     startCrawl = true;
                     break;
                 case "--turkish":
