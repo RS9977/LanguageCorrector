@@ -12,6 +12,7 @@ import util.JsonMaker;
 import util.PhraseExtractor;
 import util.SentenceExtractor;
 import util.StringFileWriter;
+import util.StringProcessor;
 import Translator.*;
 import StateMachine.*;
 
@@ -36,6 +37,7 @@ public class Corrector implements GUIListener {
         this.stringWriterGUI = StringFileWriter.of("corrected.txt");
         this.senteceIndGUI = 0;
         this.curSentenceGUI = extractedSentencesGUI.get(0);
+        this.curSentenceGUI = StringProcessor.handleApostrophe(this.curSentenceGUI.toLowerCase());
         String tempString = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
         SelectCorrectionGUI gui = new SelectCorrectionGUI(this, this.curSentenceGUI);
     }
@@ -59,6 +61,7 @@ public class Corrector implements GUIListener {
             this.curSentenceGUI = tempString;
             String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
         }
+        this.curSentenceGUI = StringProcessor.handleApostrophe(this.curSentenceGUI.toLowerCase());
         return this.curSentenceGUI;
     }
 
@@ -80,6 +83,7 @@ public class Corrector implements GUIListener {
         }
         
         this.curSentenceGUI = extractedSentencesGUI.get(senteceIndGUI);
+        this.curSentenceGUI = StringProcessor.handleApostrophe(this.curSentenceGUI.toLowerCase());
         String tempSentenceGUI = dbInterfaceGUI.correctTokenInDatabase(this.curSentenceGUI.toLowerCase(), graphGUI, 1, false);
         return this.curSentenceGUI;
 
@@ -112,6 +116,7 @@ public class Corrector implements GUIListener {
                 List<String> extractedSentences = extractor.getSentences();
                 for (String sentence : extractedSentences) {
                     System.out.println("Sentence: " + sentence);
+                    sentence = StringProcessor.handleApostrophe(sentence.toLowerCase());
                     String tempString = directTranslator.replaceWordsInSentence(sentence.toLowerCase());
                     stringWriter.appendString(tempString);
                     System.out.println("##########################################################");
@@ -119,7 +124,7 @@ public class Corrector implements GUIListener {
             }else{
                 
                 System.out.println("Sentence: " + argPars.getSentence());
-                String tempString = directTranslator.replaceWordsInSentence(argPars.getSentence().toLowerCase());
+                String tempString = directTranslator.replaceWordsInSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()));
                 stringWriter.appendString(tempString);
                 System.out.println("Translation: "+tempString);
                 System.out.println("##########################################################");
@@ -138,6 +143,7 @@ public class Corrector implements GUIListener {
                 List<String> extractedSentences = extractor.getSentences();
                 for (String sentence : extractedSentences) {
                     System.out.println("Sentence: " + sentence);
+                    sentence = StringProcessor.handleApostrophe(sentence.toLowerCase());
                     String tempString = directTranslator.replaceWordsInSentence(sentence.toLowerCase());
                     stringWriter.appendString(tempString);
                     System.out.println("##########################################################");
@@ -145,7 +151,7 @@ public class Corrector implements GUIListener {
             }else{
                 
                 System.out.println("Sentence: " + argPars.getSentence());
-                String tempString = directTranslator.replaceWordsInSentence(argPars.getSentence().toLowerCase());
+                String tempString = directTranslator.replaceWordsInSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()));
                 stringWriter.appendString(tempString);
                 System.out.println("Translation: "+tempString);
                 System.out.println("##########################################################");
@@ -166,6 +172,7 @@ public class Corrector implements GUIListener {
                 List<String> extractedSentences = extractor.getSentences();
                 for (String sentence : extractedSentences) {
                     System.out.println("Sentence: " + sentence);
+                    sentence = StringProcessor.handleApostrophe(sentence.toLowerCase());
                     String tempString = dbInterface.correctTokenInDatabase(sentence.toLowerCase(), graph, 2, true);
                     stringWriter.appendString(tempString);
 
@@ -181,11 +188,11 @@ public class Corrector implements GUIListener {
             }
         }else if(argPars.isCheckSentence()){
             if(argPars.isCorrectionGUI()){  
-                Corrector corrector = new Corrector(SentenceExtractor.of(argPars.getSentence()), argPars);  
+                Corrector corrector = new Corrector(SentenceExtractor.of(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase())), argPars);  
                 corrector.start();
             }else{
                 System.out.println("Sentence: " + argPars.getSentence());
-                stringWriter.appendString(dbInterface.correctTokenInDatabase(argPars.getSentence().toLowerCase(), graph, 2, true));
+                stringWriter.appendString(dbInterface.correctTokenInDatabase(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()), graph, 2, true));
                 try {
                     stringWriter.writeToFile();
                     System.out.println("Corrected version has been written to the file.");
