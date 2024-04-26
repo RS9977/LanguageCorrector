@@ -3,7 +3,9 @@
     - All code should run on our lab computers, unless you have an exemption from the instructor.
     - If some of your features work more efficiently on specific hardware, please explain this here.
 ## General Requirements
-All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run. These modules were developed with Unix in mind, and is not guaranteed to work on other OS systems such as Windows or MacOS.
+All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run. These modules were developed with Unix in mind, and is not guaranteed to work on other OS systems such as Windows.
+
+On lab machines you are required to load the new version of Java using `source /ad/eng/opt/java/add_jdk17.sh`
 
 ## Android App 
 When running the android app, the minimum required OS needed to start the app is Android 10. If running in Android Studio, you can clone the repo and then create a new device in the 
