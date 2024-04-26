@@ -31,8 +31,8 @@ This is provided in the repo, and there is no need to download the library exter
     Corrector:
         `./corrector --file "filename.txt"` -> This will dump the corrected sentence for English of the specidied file to `corrected.txt`
         `./corrector  --sentence "I am a book." -> This will dump the corrected sentence for English of the specidied sentence to `corrected.txt`
-        `./corrector --correctorGUI ` -> This will run a GUI where you can see what are the suggestions and choose between them.
-        `./corrector --correctorGUI --dutch` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch.
+        `./corrector --correctorGUI --file filename.txt` -> This will run a GUI where you can see what are the suggestions and choose between them. The file is where it is looking for the text to be corrected.
+        `./corrector --correctorGUI --dutch --file filename.txt` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch. The file is where it is looking for the text to be corrected.
         `./corrector --translateToDutch --file "filename.txt"` -> This will translate the english text in the file to dutch and put it in `corrected.txt`
 
     Checker:
