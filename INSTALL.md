@@ -8,7 +8,10 @@ All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run
 On lab machines you are required to load the new version of Java using `source /ad/eng/opt/java/add_jdk17.sh`
 
 ## Android App 
-When running the android app, the minimum required OS needed to start the app is Android 10.
+When running the android app, the minimum required OS needed to start the app is Android 10. If running in Android Studio, you can clone the repo and then create a new device in the 
+emulator. To do this, you will need to Tools -> Device Manager -> Create New Virtual Device (Shows up as a '+' symbol in the device manager window.). You can choose any
+device definition, but for reference I tested the app on the Pixel 8 device definition. Then select the OS version of the emulator (min. Android 10) then select the 'Portrait' Orientation. Then
+start the device in the Device Manager menu. Then to install the provided apk to the device, you can drag and drop the file into the emulator.
 
 # Supporting files
 ## Non-Standard Libraries
@@ -21,6 +24,8 @@ This is provided in the repo, and there is no need to download the library exter
 ### Simple Logging Facade for Java (SLF4J)
 This is provided in the repo, and there is no need to download the library externally. This is used for communicating with SQLite databases.
 
+### Apache Tika
+This is provided in the repo, and there is no need to download the library externally. This is used to read in files for parsing.
 ## Example Usage
 - Examples of how to use our project
 ### Checker/Corrector
@@ -42,19 +47,14 @@ This is provided in the repo, and there is no need to download the library exter
         `./checker --updateHashTable --file "SQLite/output_Boston.txt"` This will run update the database for n-grams weights.
         `./checker --validateUpdates --file "SQLite/token_database_english_updated.db"` This will run a GUI which will go through the database and check with the user if the updated tokens have a correct role.
 ```
-    
-## Testing Patterns
-- Descriptions of testing patterns, and instructions on how to exercise them:
-    - unit tests
-    - system tests
 
 # Execution
 
 ## Crawler
-To run the webcrawler, run `./crawler` in the \Crawler\ directory. The usage is as follows. Any number of arguments are allowed. 
+To run the webcrawler, run `./crawler [args]` in the /Crawler/ directory on a linux system. On Windows, run `make` in the /Crawler/src/main/java/ folder, then run `java ScratchCrawler.java [args]`. The usage is as follows. Any number of arguments are allowed. NOTES: Running the crawler *without* the --stats flag will not show any output until the crawler is finished crawling (typically ~100 seconds). Running the crawler *without* the --xl flag may often times run out of URLs to crawl before the crawling limit of 100 URLs is reached.   
 ```
 Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]
-    --file <file_path>: Read URLs from a file and start crawling
+    --file <file_path>: Read URLs from a file and start crawling. The file should be placed in the /Crawler/ directory
     --seed <seed_url>: Start crawling from a seed URL
     --mp <number>: Set the maximum number of pages to crawl
     --timeout <seconds>: Set the timeout for each page in seconds
@@ -70,6 +70,8 @@ Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--hel
 
 ## Checker/Corrector
 To build the project for CheckerCorrector we are using a make file. Running `make dev_corrector` and `make dev_checker` will compile and build the `checker.jar` and `corrector.jar` with the user interface requested, and and bash script ready to be run them as `./checker --file [PATH]` and `./corrector --file [PATH]`.
+
+**Note:** All of these commands need to be run in the CheckerCorrector directory.
 ```
 Usage:
     Corrector Options:
@@ -89,6 +91,8 @@ Usage:
         --validateUpdates: this option can be used to check the correctness of the database for tokens. This will pops up a window. You must use --file <dbname.db> for this option as well.
         --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.
 ```
+## Regex Parser
+To run the parser, you will need a file to parse (ideally a text file) and you will need to edit the code so that the `file` variable in the main function is the absolute path of the file to be parsed. You can run the file in an IDE (or via the command line) in order to start parsing. The parsed sentences will output to a file beginning with `2-` as the code removes any empty lines from the output file by making a duplicate file.
 
 ## Android App
 The Android App is designed to work on any android device that supports Android 10 and above. For simple installation, an apk file of the app is provided in the repo. Make sure to enable `Install from Unknown Sources` before installing the apk on your device as it may be blocked during the installation process. 
