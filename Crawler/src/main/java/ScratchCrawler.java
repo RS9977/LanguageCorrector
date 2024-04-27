@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Iterator;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
 public class ScratchCrawler {
     public static int MAX_PAGES = 100; // Maximum pages to crawl
     public static int TIMEOUT = 30; // Timeout for each page in seconds
@@ -142,9 +142,7 @@ public class ScratchCrawler {
             StringBuilder pageContent = new StringBuilder(); // To store the page content
 
             int linksExtracted = 0; // Number of links extracted from the page
-            while ((line = reader.readLine()) != null && pageContent.length() < max_storage) { // While there are lines to read
-                pageContent.append(line); // Add the line to the page content
-                
+            while ((line = reader.readLine()) != null && pageContent.length() < max_storage) { // While there are lines to read    
                 // Extract links from the page
                 List<String> links = RegexParser.extractLinks(line); // Extract the links from the line
                 for (String link : links) { // For each link
@@ -153,7 +151,11 @@ public class ScratchCrawler {
                         linksExtracted++; // Increment the number of links extracted
                     }
                 }
+            
+                pageContent.append(line); // Add the line to the page content
+                
             }
+            
             // Write the page content to the file, up to storage limit
             writer.println(pageContent.toString().substring(0, Math.min(max_storage, pageContent.length())));      
 
@@ -351,23 +353,6 @@ public class ScratchCrawler {
         return domain; // Return the domain
     }
 
-    // Unused in this version of the crawler
-    // public void crawl(String seed) {
-    //     pagesToVisit.add(seed); // Add the seed page to pagesToVisit
-
-    //     while (pagesVisited.size() < MAX_PAGES && !pagesToVisit.isEmpty()) { // While the number of visited pages is less than MAX_PAGES
-    //         String nextPage = getNextPage(); // Get the next page
-    //         try {
-    //             Thread.sleep(waitTime); // Wait to be polite
-    //             getPage(nextPage); // Get the page
-    //         } catch (InterruptedException e) {
-    //             System.out.println("Error waiting between crawling pages.");
-    //             e.printStackTrace();
-    //         } 
-    //     }
-
-    //     System.out.println("Crawling complete."); // Print message
-    // }
     public void crawl() {
         if (crawlingDutch) {
             crawlDutchDict(); // Crawl the Dutch translation website
@@ -386,11 +371,14 @@ public class ScratchCrawler {
                     e.printStackTrace();
                 }
             });
+            long startTime = System.currentTimeMillis();
             try {
-                future.get(TIMEOUT, java.util.concurrent.TimeUnit.SECONDS); // Set a timeout of 30 seconds for each page
+                future.get(TIMEOUT, TimeUnit.SECONDS); // Set a timeout of 30 seconds for each page
             } catch (Exception e) {
                 future.cancel(true); // Cancel the future
-                if (printStats) System.out.println("Page read timed out. Read took longer than " + TIMEOUT + " seconds.");
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                System.out.println("Exception: " + e);
+                if (printStats) System.out.println("Page read timed out. Read took longer than " + elapsedTime / 1000.0 + " seconds.");
             }
             executor.shutdownNow();
         }
@@ -525,7 +513,6 @@ public class ScratchCrawler {
                 System.out.println("Processing rate in pages per second: " + processingRatePages);
                 System.out.println("Processing rate in bytes per second: " + processingRateSize);
             }
-           
 
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -618,7 +605,7 @@ public class ScratchCrawler {
                 case "--dutchSeed":
                     //  Extend your system to a language in which none of the team members have fluency
                     // Adds a Dutch website as a seed URL
-                    crawler.pagesToVisit.add("https://www.rijksmuseum.nl/");
+                    crawler.pagesToVisit.add("https://www.telegraaf.nl/");
                     startCrawl = true;
                     break;
                 case "--turkish":
