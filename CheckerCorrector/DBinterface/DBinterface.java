@@ -85,7 +85,7 @@ public class DBinterface {
 
             int confidence = SM.isStateMachineFollowed(graph, actions, initialState, initialConf);
             //System.out.print("The confidence score is: "+ confidence + "\n");
-            return confidence;
+            return ((int)((double)confidence*100.0/(actions.size()*15)));
         } catch (SQLException e) {
             e.printStackTrace();
         }
