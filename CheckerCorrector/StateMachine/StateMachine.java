@@ -52,26 +52,82 @@ public class StateMachine{
                 flags.add(0);
             return TwoListStruct.of(actions, flags);
         }else{
-            Set<String> allPaths = new HashSet<>();
-            DFS dfs = DFS.of();
-            allPaths.addAll(dfs.dfs(graph, actions.get(0), State.DOT, actions.size()+1, 4));
-            StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
-            for(String path: allPaths)
-                sfw.appendString(path);
-            try {
-                sfw.writeToFile();
-                TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -6, 0, -3, -1);
-                ListToString lts = ListToString.of();
-                for(State action: actions)
-                    lts.addString(action);
-                String suggestedActionsString = tc.closestWord(lts.getString());
-                ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
-                List<State> parts = StringToList.split(suggestedActionsString);
-                suggestedAction.addAll(parts);
-                flags.addAll(tc.traceBack());
-                return TwoListStruct.of(suggestedAction, flags);
-            } catch (IOException e) {
-                System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            
+            
+            if(actions.size()<13){
+                Set<String> allPaths = new HashSet<>();
+                DFS dfs = DFS.of();
+                allPaths.addAll(dfs.dfs(graph, actions.get(0), State.DOT, actions.size()+1, 4));
+                StringFileWriter sfw = StringFileWriter.of("all_path.txt", "\n");
+                for(String path: allPaths)
+                    sfw.appendString(path);
+                try {
+                    sfw.writeToFile();
+                    TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -6, 0, -3, -1);
+                    ListToString lts = ListToString.of();
+                    for(State action: actions)
+                        lts.addString(action);
+                    String suggestedActionsString = tc.closestWord(lts.getString());
+                    ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
+                    List<State> parts = StringToList.split(suggestedActionsString);
+                    suggestedAction.addAll(parts);
+                    flags.addAll(tc.traceBack());
+                    return TwoListStruct.of(suggestedAction, flags);
+                } catch (IOException e) {
+                    System.err.println("An error occurred while writing to the file: " + e.getMessage());
+                }
+            }else{
+                List<State> actions1 = new ArrayList<>();
+                List<State> actions2 = new ArrayList<>();
+                for (int i = 0; i < actions.size(); i++) {
+                    if (i < actions.size()/2) {
+                        actions1.add(actions.get(i));
+                    } else {
+                        actions2.add(actions.get(i));
+                    }
+                }
+                Set<String> allPaths1 = new HashSet<>();
+                DFS dfs1 = DFS.of();
+                allPaths1.addAll(dfs1.dfs(graph, actions1.get(0), actions1.get(actions1.size()-1), actions1.size()+1, 4));
+                StringFileWriter sfw1 = StringFileWriter.of("all_path.txt", "\n");
+                for(String path: allPaths1)
+                    sfw1.appendString(path);
+                try {
+                    sfw1.writeToFile();
+                    TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -6, 0, -3, -1);
+                    ListToString lts = ListToString.of();
+                    for(State action: actions1)
+                        lts.addString(action);
+                    String suggestedActionsString = tc.closestWord(lts.getString());
+                    ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
+                    List<State> parts = StringToList.split(suggestedActionsString);
+                    suggestedAction.addAll(parts);
+                    flags.addAll(tc.traceBack());
+                    //return TwoListStruct.of(suggestedAction, flags);
+                } catch (IOException e) {
+                    System.err.println("An error occurred while writing to the file: " + e.getMessage());
+                }
+                Set<String> allPaths2 = new HashSet<>();
+                DFS dfs2 = DFS.of();
+                allPaths2.addAll(dfs2.dfs(graph, actions2.get(0), actions2.get(actions2.size()-1), actions2.size()+1, 4));
+                StringFileWriter sfw2 = StringFileWriter.of("all_path.txt", "\n");
+                for(String path: allPaths2)
+                    sfw2.appendString(path);
+                try {
+                    sfw2.writeToFile();
+                    TypoCorrector tc = TypoCorrector.of("all_path.txt", true, -6, 0, -3, -1);
+                    ListToString lts = ListToString.of();
+                    for(State action: actions2)
+                        lts.addString(action);
+                    String suggestedActionsString = tc.closestWord(lts.getString());
+                    ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
+                    List<State> parts = StringToList.split(suggestedActionsString);
+                    suggestedAction.addAll(parts);
+                    flags.addAll(tc.traceBack());
+                    return TwoListStruct.of(suggestedAction, flags);
+                } catch (IOException e) {
+                    System.err.println("An error occurred while writing to the file: " + e.getMessage());
+                }
             }
 
         }

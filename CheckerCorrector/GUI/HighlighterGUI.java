@@ -28,7 +28,7 @@ public class HighlighterGUI extends JFrame {
         mainPanel.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT));
 
         this.isDutch = isDutch;
-        setTitle("Text Highlighter");
+        setTitle("Text Checker Highlighter");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 

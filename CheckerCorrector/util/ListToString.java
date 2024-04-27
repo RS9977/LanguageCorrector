@@ -18,7 +18,7 @@ public class ListToString {
     }
     public void addString(State s){
         finalString.append(State.mapToChar(s));//.toString().substring(0,3));
-        finalString.append(".");
+       // finalString.append(".");
     }
     public String getString(){
         return finalString.toString();
