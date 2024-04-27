@@ -84,10 +84,10 @@ Usage:
     Checker Options:
         --file <filename>: this option should be used if you want to pass your input as file.
         -sentence <sentence>: this option should be used if you want to pass your input as a small sentence.
-        --: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.
-        --updateToken: this option should be used alongside a file as input to update new tokens for the database from the crawled data. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.
-        --updateTokenFromDic: this option should be used alongside a file as input to update new tokens for the database from the crawled data from a dictionary website. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.
-        --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes. You must use --file <filename.txt> which has the crawled data for this option as well.
+        --checkerGUI: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.
+        --updateToken: this option should be used alongside a file as input to update new tokens for the database from the crawled data. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well. The crawled data consists of sentences that is recieved from the crawler. 
+        --updateTokenFromDic: this option should be used alongside a file as input to update new tokens for the database from the crawled data from a dictionary website. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well. The crawled data consists of words and their roles and their translation as it is crawled by crawler.
+        --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes. You must use --file <filename.txt> which has the crawled data for this option as well. The crawled data consists of sentences that is recieved from the crawler. 
         --validateUpdates: this option can be used to check the correctness of the database for tokens. This will pops up a window. You must use --file <dbname.db> for this option as well.
         --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.
 ```
