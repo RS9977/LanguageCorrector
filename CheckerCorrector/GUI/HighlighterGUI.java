@@ -17,9 +17,16 @@ import java.util.Random;
 
 public class HighlighterGUI extends JFrame {
     private JTextArea textArea;
+    private JPanel mainPanel;
     private JButton highlightButton;
     public boolean isDutch;
+    private static final int POPUP_WIDTH = 800;
+    private static final int POPUP_HEIGHT = 300;
+
     public HighlighterGUI(boolean isDutch) {
+        mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT));
+
         this.isDutch = isDutch;
         setTitle("Text Highlighter");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,12 +40,28 @@ public class HighlighterGUI extends JFrame {
                 highlightPhrases();
             }
         });
-
+        
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(highlightButton);
+        
+        JFrame frame = new JFrame("Color Spectrum Panel");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        add(new JScrollPane(textArea), BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        int panelWidth  = POPUP_WIDTH;
+        int panelHeight = POPUP_HEIGHT/10;
+        ColorSpectrumPanel colorSpectrumPanel = new ColorSpectrumPanel(panelWidth, panelHeight);
+
+
+        mainPanel.add(new JScrollPane(textArea), BorderLayout.NORTH);
+        mainPanel.add(colorSpectrumPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
+
+
+        //add(, BorderLayout.CENTER);
+        //add(buttonPanel, BorderLayout.SOUTH);
 
         pack();
         setLocationRelativeTo(null);
