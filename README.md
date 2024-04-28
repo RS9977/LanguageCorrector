@@ -56,7 +56,7 @@ In order to have a checker/corrector that is working properly it needs to proces
 - Provide a reasonable translation from English to another language based on common language structures. [30%] 
     - We added the ability to translation from Dutch to English and from English to Dutch. We accomplished this by crawling a Dutch to English online dictionary and translating the words literally. Usage: use `--dutchDict` argument with crawler to re-crawl the dictionary. For translation we used crawled dictionary and translate the data on both side.`--translateToEnglish` and `--translateToDutch` in corrector will do this.
 
-### Implemented Features not in description of Language correction
+### Implemented Features not in description of Language Correction FosWiki page
 - Implement a GUI to help user give feedback on updated tokens.
 - Accept sentence in command line as well as file name for both checker and corrector.
 - Help option for command line and detection of non-valid commands for checker and corrector.
@@ -73,7 +73,7 @@ https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 
 Michael Harkess: Data Parser, Android App
 
-Reza Sajjadi: All of the package and module in CheckerCorrector including: Language checker and corrector with all of the GUI features for them, including feature 2, 3 and 5 and other features like giving user feadback on tokens, and the list of possible corrections, the extention to dutch and translation for dutch and to dutch on checker/corrector 
+Reza Sajjadi: All of the package and module in CheckerCorrector including: Language checker and corrector with all of the GUI features for them, including feature 2, 3 and 5 and other features like giving user feadback on tokens, and the list of possible corrections, the extention to dutch and translation for dutch and to dutch for checker/corrector 
 
 This work breakdown is signed by Everyone:
 Seyed Reza Sajjadinasab
