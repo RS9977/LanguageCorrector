@@ -8,3 +8,4 @@
 - Update the accuracy of the checker in GUI and some other options.
 - Fix bugs resulted in case of using a special charachter for both checker and corrector.
 - Increase the speed of corrector's GUI and fix reported bug for running out of heap memory.
+- Fix corrector bugs of not updating the typos in the final correction.
