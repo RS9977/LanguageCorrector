@@ -5,7 +5,9 @@ import javax.swing.text.DefaultHighlighter;
 
 import DBinterface.DBinterface;
 import DirectedGraph.BasicGraph;
+import HashTableMaker.HashTableMaker;
 
+import java.sql.SQLException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,11 +17,18 @@ import java.util.Random;
 
 public class HighlighterGUI extends JFrame {
     private JTextArea textArea;
+    private JPanel mainPanel;
     private JButton highlightButton;
     public boolean isDutch;
+    private static final int POPUP_WIDTH = 800;
+    private static final int POPUP_HEIGHT = 300;
+
     public HighlighterGUI(boolean isDutch) {
+        mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setPreferredSize(new Dimension(POPUP_WIDTH, POPUP_HEIGHT));
+
         this.isDutch = isDutch;
-        setTitle("Text Highlighter");
+        setTitle("Text Checker Highlighter");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -31,12 +40,28 @@ public class HighlighterGUI extends JFrame {
                 highlightPhrases();
             }
         });
-
+        
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(highlightButton);
+        
+        JFrame frame = new JFrame("Color Spectrum Panel");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        add(new JScrollPane(textArea), BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        int panelWidth  = POPUP_WIDTH;
+        int panelHeight = POPUP_HEIGHT/10;
+        ColorSpectrumPanel colorSpectrumPanel = new ColorSpectrumPanel(panelWidth, panelHeight);
+
+
+        mainPanel.add(new JScrollPane(textArea), BorderLayout.NORTH);
+        mainPanel.add(colorSpectrumPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
+
+
+        //add(, BorderLayout.CENTER);
+        //add(buttonPanel, BorderLayout.SOUTH);
 
         pack();
         setLocationRelativeTo(null);
@@ -52,7 +77,7 @@ public class HighlighterGUI extends JFrame {
     private List<String> extractPhrases(String text, int phraseLength) {
         List<String> phrases = new ArrayList<>();
         String[] words = text.split("\\s+");
-        for (int i = 0; i <= words.length - phraseLength; i+=phraseLength) {
+        for (int i = 0; i <= words.length - phraseLength; i+=1) {
             StringBuilder phraseBuilder = new StringBuilder();
             for (int j = 0; j < phraseLength; j++) {
                 phraseBuilder.append(words[i + j]);
@@ -66,21 +91,32 @@ public class HighlighterGUI extends JFrame {
     }
 
     private void highlightPhrases(List<String> phrases) {
-        DBinterface dbInterface;
-        if(!this.isDutch){
-            dbInterface = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt");
-        }else{
-            dbInterface = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt");
-        }
-        BasicGraph basicGraphClass = new BasicGraph();
-        for (String phrase : phrases) {
-            highlightPhrase(phrase, dbInterface.checkTokenInDatabase(phrase, basicGraphClass.getGraph()));
+        try{
+            DBinterface dbInterface;
+            HashTableMaker manager;
+            if(!this.isDutch){
+                dbInterface = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt");
+                manager = new HashTableMaker("SQLite/hash_database_english.db");
+            }else{
+                dbInterface = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt");
+                manager = new HashTableMaker("SQLite/hash_database_dutch.db");
+            }
+            BasicGraph basicGraphClass = new BasicGraph();
+            for (String phrase : phrases) {
+                double conf = dbInterface.checkTokenInDatabase(phrase, basicGraphClass.getGraph())*0.8;   
+                conf += manager.nGram(phrase, 3)*0.2;
+                //System.out.println(phrase + "| "+ conf);
+                highlightPhrase(phrase, (int)conf);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     private Color getColorForNumber(int number) {
-        float hue = (float) number / 100; // Hue ranges from 0 to 1
-        return Color.getHSBColor(hue, 1, 1);
+        float hue = ((float) number / 100); // Hue ranges from 0 to 1
+        //System.out.println(hue);
+        return Color.getHSBColor(0, hue, 1);
     }
 
     private void highlightPhrase(String phrase, int colorInd) {

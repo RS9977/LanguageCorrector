@@ -3,7 +3,9 @@
     - All code should run on our lab computers, unless you have an exemption from the instructor.
     - If some of your features work more efficiently on specific hardware, please explain this here.
 ## General Requirements
-All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run. These modules were developed with Unix in mind, and is not guaranteed to work on other OS systems such as Windows or MacOS.
+All CLI modules of this repo (Checker/Corrector/Crawler) requires Java 17 to run. These modules were developed with Unix in mind, and is not guaranteed to work on other OS systems such as Windows.
+
+On lab machines you are required to load the new version of Java using `source /ad/eng/opt/java/add_jdk17.sh`
 
 ## Android App 
 When running the android app, the minimum required OS needed to start the app is Android 10. If running in Android Studio, you can clone the repo and then create a new device in the 
@@ -22,6 +24,8 @@ This is provided in the repo, and there is no need to download the library exter
 ### Simple Logging Facade for Java (SLF4J)
 This is provided in the repo, and there is no need to download the library externally. This is used for communicating with SQLite databases.
 
+### Apache Tika
+This is provided in the repo, and there is no need to download the library externally. This is used to read in files for parsing.
 ## Example Usage
 - Examples of how to use our project
 ### Checker/Corrector
@@ -29,8 +33,8 @@ This is provided in the repo, and there is no need to download the library exter
     Corrector:
         `./corrector --file "filename.txt"` -> This will dump the corrected sentence for English of the specidied file to `corrected.txt`
         `./corrector  --sentence "I am a book." -> This will dump the corrected sentence for English of the specidied sentence to `corrected.txt`
-        `./corrector --correctorGUI ` -> This will run a GUI where you can see what are the suggestions and choose between them.
-        `./corrector --correctorGUI --dutch` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch.
+        `./corrector --correctorGUI --file filename.txt` -> This will run a GUI where you can see what are the suggestions and choose between them. The file is where it is looking for the text to be corrected.
+        `./corrector --correctorGUI --dutch --file filename.txt` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch. The file is where it is looking for the text to be corrected.
         `./corrector --translateToDutch --file "filename.txt"` -> This will translate the english text in the file to dutch and put it in `corrected.txt`
 
     Checker:
@@ -84,10 +88,10 @@ Usage:
     Checker Options:
         --file <filename>: this option should be used if you want to pass your input as file.
         -sentence <sentence>: this option should be used if you want to pass your input as a small sentence.
-        --: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.
-        --updateToken: this option should be used alongside a file as input to update new tokens for the database from the crawled data. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.
-        --updateTokenFromDic: this option should be used alongside a file as input to update new tokens for the database from the crawled data from a dictionary website. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well.
-        --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes. You must use --file <filename.txt> which has the crawled data for this option as well.
+        --checkerGUI: this option can be used if you want a GUI for the checker to see the highlighted sentences. This option is interactive mode.
+        --updateToken: this option should be used alongside a file as input to update new tokens for the database from the crawled data. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well. The crawled data consists of sentences that is recieved from the crawler. 
+        --updateTokenFromDic: this option should be used alongside a file as input to update new tokens for the database from the crawled data from a dictionary website. This option may take hours based on the size of crawled file. You must use --file <filename.txt> which has the crawled data for this option as well. The crawled data consists of words and their roles and their translation as it is crawled by crawler.
+        --updateHashTable: this option should be used alongside a file as input to update n-grams weights for the database. This option may take a few minutes. You must use --file <filename.txt> which has the crawled data for this option as well. The crawled data consists of sentences that is recieved from the crawler. 
         --validateUpdates: this option can be used to check the correctness of the database for tokens. This will pops up a window. You must use --file <dbname.db> for this option as well.
         --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.
 ```

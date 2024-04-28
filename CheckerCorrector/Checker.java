@@ -61,6 +61,7 @@ public class Checker {
                 for (String sentence : extractedSentences) {
                     i++;
                     //dbInterface.updateTokenInDatabase(sentence.toLowerCase(), graph);
+                    sentence = StringProcessor.handleApostrophe(sentence.toLowerCase());
                     PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 3, 5);
                     List<String> phrases = extractorPhrase.getPhrases();
                     for (String phrase : phrases) {
@@ -71,7 +72,7 @@ public class Checker {
                 System.out.println("\n-------------------------------------------\n"+ "Number of update: "+ cntUpdate);
             }else if(argPars.isCheckSentence()){
                 //dbInterface.updateTokenInDatabase(argPars.getSentence().toLowerCase(), graph);
-                for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),3, 5).getPhrases()) {
+                for (String phrase : PhraseExtractor.fromSentence(StringProcessor.handleApostrophe(argPars.getSentence()),3, 5).getPhrases()) {
                     dbInterface.updateTokenInDatabase(phrase.toLowerCase(), graph);                    
                 }
             }
@@ -93,6 +94,7 @@ public class Checker {
                         manager = new HashTableMaker("SQLite/hash_database_english.db");
                     }
                     for (String sentence : extractedSentences) {
+                        sentence = StringProcessor.handleApostrophe(sentence.toLowerCase());
                         manager.updateDatabase(sentence.toLowerCase());
                         PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence, 1, 4);
                         List<String> phrases = extractorPhrase.getPhrases();
@@ -107,8 +109,8 @@ public class Checker {
             }else if(argPars.isCheckSentence()){
                 try {
                     HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
-                    manager.updateDatabase(argPars.getSentence().toLowerCase());
-                    for (String phrase : PhraseExtractor.fromSentence(argPars.getSentence(),1, 4).getPhrases()) {
+                    manager.updateDatabase(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()));
+                    for (String phrase : PhraseExtractor.fromSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()),1, 4).getPhrases()) {
                         manager.updateDatabase(phrase.toLowerCase());                      
                     }
                     manager.closeConnection();
@@ -123,7 +125,7 @@ public class Checker {
                 HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
                 for (String sentence : extractedSentences) {
                     System.out.println("Sentence: " + sentence);
-                    
+                    sentence = StringProcessor.handleApostrophe(sentence.toLowerCase());
                     System.out.println("*********************************************************");
                     PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(sentence);
                     List<String> phrases = extractorPhrase.getPhrases();
@@ -149,19 +151,30 @@ public class Checker {
                 e.printStackTrace();
             }
         }else if(argPars.isCheckSentence()){
-
-            System.out.println("Sentence: " + argPars.getSentence());
-            jsonMaker.addSentence(argPars.getSentence().toLowerCase(), dbInterface.checkTokenInDatabase(argPars.getSentence().toLowerCase(), graph));
-            System.out.println("*********************************************************");
-            PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(argPars.getSentence().toLowerCase());
-            List<String> phrases = extractorPhrase.getPhrases();
-            for (String phrase : phrases) {
-                System.out.println("Phrase: " + phrase);
-                jsonMaker.addPhrase(phrase, dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph));
-                System.out.println("------------------------------------------------------------");
+            try {
+                HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
+                System.out.println("Sentence: " + argPars.getSentence());
+                String sentence = StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase());
+                int ngram        = manager.nGram(sentence, 3);
+                int stateMachine = dbInterface.checkTokenInDatabase(sentence.toLowerCase(), graph);
+                int conf         = (ngram>=0)?(int)(ngram*0.2+stateMachine*0.8):stateMachine;
+                jsonMaker.addSentence(sentence, conf);
+                System.out.println("*********************************************************");
+                PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()));
+                List<String> phrases = extractorPhrase.getPhrases();
+                for (String phrase : phrases) {
+                    ngram        = manager.nGram(phrase.toLowerCase(), 3);
+                    stateMachine = dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph);
+                    conf         = (ngram>=0)?(int)(ngram*0.2+stateMachine*0.8):stateMachine;
+                    System.out.println("Phrase: " + phrase);
+                    jsonMaker.addPhrase(phrase, conf);
+                    System.out.println("------------------------------------------------------------");
+                }
+                jsonMaker.toJson("confidence_ourChecker.json");
+                System.out.println("##########################################################");
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            jsonMaker.toJson("confidence_ourChecker.json");
-            System.out.println("##########################################################");
         }else if(argPars.isCheckGUI()){
             SwingUtilities.invokeLater(new Runnable() {
                 @Override

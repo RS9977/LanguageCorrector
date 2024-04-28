@@ -57,13 +57,14 @@ public class StringFileWriter {
         File file = new File(fileName);
         if (file.exists()) {
             boolean deleted = file.delete();
+            /* 
             if (deleted) {
                 System.out.println("File '" + fileName + "' has been deleted successfully.");
             } else {
                 System.out.println("Failed to delete the file '" + fileName + "'.");
-            }
-        } else {
+            }*/
+        } /*else {
             System.out.println("File '" + fileName + "' does not exist.");
-        }
+        }*/
     }
 }

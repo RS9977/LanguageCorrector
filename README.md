@@ -16,7 +16,7 @@ Reza Sajjadi
 ### Crawler
 Our crawler works as follows: URLs to crawl, URLs that have been crawl, and dissallowed domains are saved in HashSets. We used HashSets because they enforce uniqueness (we do not want to crawl the same URL multiple times) and operate in O(1) time for adding, removing, and contains operations. Seed URLs are added either by command line arguments or from a specified file. The seeds are loaded into the HashMap. From there, until we run out of URLs to crawl or hit our page crawl limit, we crawl each page one at a time. The crawl algorithm works as follows: the next URL is removed from the HashSet. We then check if its domain is known to allow crawling. If the domain has not been crawled before, we check the website's robots.txt file to see what pages are allowed to be crawled and save those preferences so we can respect them later. If the  has been crawled before, then then we simply check if the URL is in the allowed Domains HashSet. If it is not allowed, the URL is skipped. If it is allowed, we then update the wait delay and write to a file as much data as allowed per website (default 1KB). After a page is finished being crawled (and we are below the crawled page limit), the crawler fetches the next page and the process repeats. 
 #### Checker
-Our checker is using two different methods to assign confidence points. The first method uses a State Machine and the second is using an n-Grams inspired implementation. The final score will be a weighted sum of these scores provided by two different methods.
+Our checker is using two different methods to assign confidence points. A confidence point is 0 if the checker didn't find any problem and 100 if it was completley skeptical. The first method uses a State Machine and the second is using an n-Grams inspired implementation. The final score will be a weighted sum of these scores provided by two different methods.
 
 ##### State Machine Checker
 In order to have a good working State machine we need to first update the grammar and roles of each word manually. This step will be automatized to some extent in the next milestones. Tokens are provided in `CheckerCorrector/SQLite/mydatabase.db`, and also the basic graph provided by `CheckerCorrector/DirectedGraph/BasicGraph.java`. A sentence will first go through a typo checker and get updated if needed (it will also affect the confidence score). Then the sentence will be tokenized, and using the provided graph it will check whether the sentence is following the correct format or not, for each miss on any edge of the graph a penalty will be added to the confidence score.
@@ -31,6 +31,9 @@ In order to show the effictiveness of our tool we used ChatGBT to write a script
 #### Corrector
 The current corrector uses the typo corrector which was used in the checker and also the state machine to suggest possible corrections. Corrections of the typo corrector are based on the most similar path through the state machine. In order to find a similar path we are first doing a DFS on the graph starting from the first token and storing all the possible paths. Then, based on the most similar path we decide whether we should change/delete/add a token and suggest a token with a similar role.
 The correction at this point is limited to the state machine complexity, but it will be improved for the next milestone.
+
+#### Learning Proceess and Database Updating
+In order to have a checker/corrector that is working properly it needs to process the crawled data. This processing cosists of different stages. The process for n-grams is to break compute the hash of each new phrase and add up the number of its occurecs. The other updates is the update for tokens. The tool needs so somehow learn what is the role of each word in a sentence. It can be given a to it directly which is happen when a crawled data from a dictionary is given to it, or it can happen just by giving the raw data. Giving the raw data can cause some mis proccessing since the tool will learn the token by itslef. That is why we have an option where the user can decide whether the role predicted for the token by the tool is valid or not through a GUI.
 
 ### Implemented Features
 - Provide real-time status and statistics ( e.g., what URL is being processed, rate of processing, size of storage, etc.) feedback for the crawler. [10%]
@@ -53,6 +56,12 @@ The correction at this point is limited to the state machine complexity, but it 
 - Provide a reasonable translation from English to another language based on common language structures. [30%] 
     - We added the ability to translation from Dutch to English and from English to Dutch. We accomplished this by crawling a Dutch to English online dictionary and translating the words literally. Usage: use `--dutchDict` argument with crawler to re-crawl the dictionary. For translation we used crawled dictionary and translate the data on both side.`--translateToEnglish` and `--translateToDutch` in corrector will do this.
 
+### Implemented Features not in description of Language Correction FosWiki page
+- Implement a GUI to help user give feedback on updated tokens.
+- Accept sentence in command line as well as file name for both checker and corrector.
+- Help option for command line and detection of non-valid commands for checker and corrector.
+
+
 ### References
 https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 
@@ -60,18 +69,25 @@ https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 - Most Updated (Stable) Branch: Master
 
 ## Work Breakdown
-Webcrawler, Data Parser, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial) by Alex Melnick 
+**Alex Melnick**: Webcrawler, Data Parser, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial)
 
-Data Parser, Android App by Michael Harkess
+**Michael Harkess**: Data Parser, Android App
 
-All of the package and module in CheckerCorrector including: Language checker and corrector with all of the GUI features for them, including feature 3 and 5 and other features like giving user feadback on tokens, and the list of possible corrections, The extention to dutch and translation for dutch on checker/corrector the by Reza Sajjadi
+**Reza Sajjadinasab**: All of the package and module in CheckerCorrector including: Language checker and corrector with all of the GUI features for them, including feature 2, 3 and 5 and other features like giving user feadback on tokens, and the list of possible corrections, the extention to dutch and translation for dutch and to dutch for checker/corrector 
 
 This work breakdown is signed by Everyone:
 Seyed Reza Sajjadinasab
 Alexander Ross Melnick
 Michael Harkess
+### Known Issues/Bugs/Limitation
 
-### Known Issues/Bugs
+#### Checker/Corrector
+- The tool is unable to detect the language and it is assumed that the user is giving the desired language by specifying the target.
+- The corrector is mostly effective for typo correction. There are some hyper paramters withing the code that can be tuned to help the corrector decide how aggresive it should rewrite the code, but still it has known problem with suggesting a replacement.
+- Both corrector and checker are limited by how large the crawled data was and how much the user fix them.
+- The corrector is unable to fix the relation of groups of word more than 2 because it's not using the n-grams.
+- The way Apostrophe s is handled is to expand the clause, e.g. "it's -> it is" and "John's car -> car of John"
+
 #### Android App
 - If a dialog box pops up and the device/screen is rotated, then the app will unexpectedly crash
 - The confidence score of every word in a given sentence/phrase is 0

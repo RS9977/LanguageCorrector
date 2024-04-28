@@ -332,8 +332,9 @@ public class ScratchCrawler {
         if (visitedRobotsTXTs.containsKey(domain)) { // If the domain is in the map
             RobotsTXT robotsTXT = visitedRobotsTXTs.get(domain); // Get the RobotsTXT object for the domain
             if (robotsTXT.getDisallowedPaths().contains(url.replaceFirst(domain, ""))) { // If the URL is disallowedif (robotsTXT.getDisallowedPaths().contains(domain - url)) { // If the URL is disallowed
-                if (Debug.DEBUG)
+                if (Debug.DEBUG) {
                     System.out.println("URL is disallowed by robots.txt: " + url); // Print message
+                }
                 return false; // Return false
             } else {
                 // URL is allowed

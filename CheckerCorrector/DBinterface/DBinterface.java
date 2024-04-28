@@ -85,7 +85,7 @@ public class DBinterface {
 
             int confidence = SM.isStateMachineFollowed(graph, actions, initialState, initialConf);
             //System.out.print("The confidence score is: "+ confidence + "\n");
-            return confidence;
+            return ((int)((double)confidence*100.0/(actions.size()*15)));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -128,6 +128,9 @@ public class DBinterface {
         int flagsCorrectioncnt = 0;
         boolean flagTypoCorrectionAccepted = true;
         StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", isNotGUI);
+
+        //System.out.println(flagsCorrection);
+
         try (Connection connection = DriverManager.getConnection(this.url)) {
 
             // Lookup each token in the database and categorize it
@@ -152,7 +155,7 @@ public class DBinterface {
                                 
                                 initialConf += 5;
                                 if(flagsCorrection.isEmpty()){
-                                    sfw.appendString(token + " -> "+ tokenCorrected + "*");
+                                    sfw.appendString(token + " (REPLACE WITH) -> "+ tokenCorrected + "*");
                                 }else if(!flagsCorrection.get(flagsCorrectioncnt) && isNotGUI){
                                     flagTypoCorrectionAccepted = false;
                                     //tokenList.set(i, "nan");
@@ -162,7 +165,7 @@ public class DBinterface {
                                 }
                                 flagsCorrectioncnt++;
                             }
-                           // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+                           //System.out.println("Corrected token: " + token + " -> " + tokenCorrected);
 
                             query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
                             // Replace the token with its role
@@ -172,6 +175,8 @@ public class DBinterface {
                                 role = resultSet.getString("role");
                               //  ////System.out.print("| Second try: "+ token + " -> " + role);
                                 tokens[i] = role;
+                            }else{
+                                tokenList.set(i,tokenCorrected);
                             }
                         }
 
@@ -203,7 +208,8 @@ public class DBinterface {
                 int biasToken = 0;
                 
                 //if(!isNotGUI)
-                // System.out.println(flagsCorrection);
+                //System.out.println(flags);
+                //System.out.println(suggested);
                 for(int i=0; i<suggested.size(); i++){
                     if(seenDot){
                         //indDotseen = i;
@@ -224,8 +230,8 @@ public class DBinterface {
                                 if(i+biasToken<tokenList.size()){
                                     
                                     if(flagsCorrection.isEmpty()){
+                                        sfw.appendString(tokenList.get(i) + " (REPLACE WITH) -> "+ word);
                                         tokenList.set(i+biasToken,word);
-                                        sfw.appendString(tokenList.get(i) + " -> "+ word);
                                     }else if(flagsCorrection.get(flagsCorrectioncnt)){
                                         
                                         tokenList.set(i+biasToken,word);
@@ -234,7 +240,7 @@ public class DBinterface {
                                     
                                 }else{
                                     if(flagsCorrection.isEmpty()){
-                                        sfw.appendString("IND: "+ i + " -> "+ word);
+                                        sfw.appendString("(INSERTION INTO INDEX): "+ i + " -> "+ word);
                                         tokenList.add(word);
                                     }else if(flagsCorrection.get(flagsCorrectioncnt)){
                                         tokenList.add(word);
@@ -247,7 +253,7 @@ public class DBinterface {
                     }else if(flags.get(i+delCnt)==2){
                         delCnt++;
                         if(flagsCorrection.isEmpty()){
-                            sfw.appendString(tokenList.get(i) + " -> X");
+                            sfw.appendString(tokenList.get(i) + "-> (REMOVE)");
                             tokenList.remove(i+biasToken);
                         }else if(flagsCorrection.get(flagsCorrectioncnt)){
                             tokenList.remove(i+biasToken);
@@ -267,7 +273,7 @@ public class DBinterface {
                                 ////System.out.println("Here I am: "+ word);
                                 
                                 if(flagsCorrection.isEmpty()){
-                                    sfw.appendString("IND: "+ i + " -> "+ word);
+                                    sfw.appendString("(INSERTION INTO THE END) -> "+ word);
                                     if(i<tokenList.size()){
                                         tokenList.add(i+biasToken,word);
                                     }else{
@@ -300,10 +306,11 @@ public class DBinterface {
             } catch (IOException e) {
                 System.err.println("An error occurred while writing to the file: " + e.getMessage());
             }
-           // System.out.println(tokenList);
+           //System.out.println(tokenList);
             StringBuilder result = new StringBuilder();
             boolean flagStart = false;
             int i = 0;
+            //System.out.println(tokenList);
             for (String token : tokenList) {
                 if(i==indDotseen)
                     break;
