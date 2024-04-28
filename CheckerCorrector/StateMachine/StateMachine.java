@@ -65,6 +65,7 @@ public class StateMachine{
                     ListToString lts = ListToString.of();
                     for(State action: actions)
                         lts.addString(action);
+                    
                     String suggestedActionsString = tc.closestWord(lts.getString());
                     //System.out.println(lts.getString() + " -> " + suggestedActionsString);
                     List<State> parts = StringToList.split(suggestedActionsString);
