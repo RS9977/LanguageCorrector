@@ -188,7 +188,7 @@ public class Corrector implements GUIListener {
             }
         }else if(argPars.isCheckSentence()){
             if(argPars.isCorrectionGUI()){  
-                Corrector corrector = new Corrector(SentenceExtractor.of(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase())), argPars);  
+                Corrector corrector = new Corrector(SentenceExtractor.ofLine(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase())), argPars);  
                 corrector.start();
             }else{
                 System.out.println("Sentence: " + argPars.getSentence());

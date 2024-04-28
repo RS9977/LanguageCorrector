@@ -168,11 +168,11 @@ public class BasicGraph {
         graph.addEdge(State.ADVERB,      State.VERB);
         edgeList.put(State.ADVERB.toString(), State.VERB.toString());
 
-        graph.addEdge(State.NOUN,      State.NOUN);
-        edgeList.put(State.NOUN.toString(), State.NOUN.toString());
+        //graph.addEdge(State.NOUN,      State.NOUN);
+        //edgeList.put(State.NOUN.toString(), State.NOUN.toString());
 
-        graph.addEdge(State.ADJECTIVE,      State.ADJECTIVE);
-        edgeList.put(State.ADJECTIVE.toString(), State.ADJECTIVE.toString());
+        //graph.addEdge(State.ADJECTIVE,      State.ADJECTIVE);
+        //edgeList.put(State.ADJECTIVE.toString(), State.ADJECTIVE.toString());
     }
     public DirectedGraph<State> getGraph() {
         return graph;
