@@ -80,6 +80,7 @@ Michael Harkess
 - The corrector is mostly effective for typo correction. There are some hyper paramters withing the code that can be tuned to help the corrector decide how aggresive it should rewrite the code, but still it has known problem with suggesting a replacement.
 - Both corrector and checker are limited by how large the crawled data was and how much the user fix them.
 - The corrector is unable to fix the relation of groups of word more than 2 because it's not using the n-grams.
+- The way Apostrophe s is handled is to expand the clause, e.g. "it's -> it is" and "John's car -> car of John"
 
 #### Android App
 - If a dialog box pops up and the device/screen is rotated, then the app will unexpectedly crash
