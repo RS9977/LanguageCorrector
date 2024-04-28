@@ -60,7 +60,6 @@ In order to have a checker/corrector that is working properly it needs to proces
 - Implement a GUI to help user give feedback on updated tokens.
 - Accept sentence in command line as well as file name for both checker and corrector.
 - Help option for command line and detection of non-valid commands for checker and corrector.
-- 
 
 
 ### References
