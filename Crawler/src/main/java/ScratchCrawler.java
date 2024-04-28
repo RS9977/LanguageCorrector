@@ -183,13 +183,13 @@ public class ScratchCrawler {
         } catch (MalformedURLException e) {
             if(printStats) {
                 System.out.println("Error creating URL object.");
-                e.printStackTrace();
+                if (Debug.DEBUG) { e.printStackTrace(); }
             }
             return; // Exit the method
         } catch (IOException e) {
             if(printStats) {
                 System.out.println("Error reading page.");
-                e.printStackTrace();
+                if (Debug.DEBUG) { e.printStackTrace(); }
             }
             return; // Exit the method
         } 
@@ -258,7 +258,7 @@ public class ScratchCrawler {
         } catch (MalformedURLException e) {
             if(printStats) {
                 System.out.println("Error creating URL object for robots.txt file.");
-                e.printStackTrace();
+                if (Debug.DEBUG_RobotsTXT) { e.printStackTrace(); } 
             }
             return; // Exit the method
         } catch (IOException e) {
@@ -368,7 +368,7 @@ public class ScratchCrawler {
                     getPage(nextPage); // Get the page
                 } catch (InterruptedException e) {
                     System.out.println("Error waiting between crawling pages.");
-                    e.printStackTrace();
+                    if (Debug.DEBUG) { e.printStackTrace();} 
                 }
             });
             long startTime = System.currentTimeMillis();
@@ -520,13 +520,13 @@ public class ScratchCrawler {
         } catch (MalformedURLException e) {
             if(printStats) {
                 System.out.println("Error creating URL object.");
-                e.printStackTrace();
+                if (Debug.DEBUG) { e.printStackTrace(); }
             }
             return; // Exit the method
         } catch (IOException e) {
             if(printStats) {
                 System.out.println("Error reading page.");
-                e.printStackTrace();
+                if (Debug.DEBUG) { e.printStackTrace(); }
             }
             return; // Exit the method
         } 
@@ -542,7 +542,7 @@ public class ScratchCrawler {
             }
         } catch (IOException e) {
             System.out.println("Error reading file: " + filePath);
-            e.printStackTrace();
+            if (Debug.DEBUG) { e.printStackTrace(); }
         }
     }
 
