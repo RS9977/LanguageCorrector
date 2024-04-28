@@ -69,11 +69,11 @@ https://docs.oracle.com/javase/tutorial/networking/urls/index.html
 - Most Updated (Stable) Branch: Master
 
 ## Work Breakdown
- Alex Melnick: Webcrawler, Data Parser, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial)
+**Alex Melnick**: Webcrawler, Data Parser, Webcrawler stats, Webcrawler social media, Extend system to other language (partial), Provide a reasonable translation (partial)
 
-Michael Harkess: Data Parser, Android App
+**Michael Harkess**: Data Parser, Android App
 
-Reza Sajjadi: All of the package and module in CheckerCorrector including: Language checker and corrector with all of the GUI features for them, including feature 2, 3 and 5 and other features like giving user feadback on tokens, and the list of possible corrections, the extention to dutch and translation for dutch and to dutch for checker/corrector 
+**Reza Sajjadinasab**: All of the package and module in CheckerCorrector including: Language checker and corrector with all of the GUI features for them, including feature 2, 3 and 5 and other features like giving user feadback on tokens, and the list of possible corrections, the extention to dutch and translation for dutch and to dutch for checker/corrector 
 
 This work breakdown is signed by Everyone:
 Seyed Reza Sajjadinasab
