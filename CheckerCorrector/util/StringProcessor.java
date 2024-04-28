@@ -68,6 +68,12 @@ public class StringProcessor {
         result.append(text.substring(lastEnd));
         text = result.toString();
         text = text.replaceAll("[\\'’]", "");
+        //System.out.println(text);
+        Pattern pattern1 = Pattern.compile("[^a-zA-Z0-9\\s,.?!]");
+        Matcher matcher1 = pattern1.matcher(text);
+        text = matcher1.replaceAll("");
+        //System.out.println(text);
+        
 
         return text;
     }
