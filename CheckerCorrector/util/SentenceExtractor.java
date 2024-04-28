@@ -14,7 +14,7 @@ public class SentenceExtractor {
     }
 
     public static SentenceExtractor of(String filePath) {
-        System.out.println(filePath);
+        //System.out.println(filePath);
         List<String> sentences = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             StringBuilder sb = new StringBuilder();
@@ -34,6 +34,23 @@ public class SentenceExtractor {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return new SentenceExtractor(sentences);
+    }
+
+    public static SentenceExtractor ofLine(String line) {
+        //System.out.println(filePath);
+        List<String> sentences = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        String[] parts = line.split("\\.");
+        for (String part : parts) {
+                    // Append the part to the StringBuilder
+            sb.append(part).append(".");
+                    // If the StringBuilder contains a complete sentence, add it to the list
+            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '.') {
+                sentences.add(sb.toString().trim());
+                sb.setLength(0);
+            }
         }
         return new SentenceExtractor(sentences);
     }

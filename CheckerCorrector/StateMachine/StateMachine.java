@@ -51,9 +51,7 @@ public class StateMachine{
             for(int i =0; i<actions.size(); i++)
                 flags.add(0);
             return TwoListStruct.of(actions, flags);
-        }else{
-            
-            
+        }else{ 
             if(actions.size()<13){
                 Set<String> allPaths = new HashSet<>();
                 DFS dfs = DFS.of();
@@ -68,7 +66,7 @@ public class StateMachine{
                     for(State action: actions)
                         lts.addString(action);
                     String suggestedActionsString = tc.closestWord(lts.getString());
-                    ////System.out.println(lts.getString() + " -> " + suggestedActionsString);
+                    //System.out.println(lts.getString() + " -> " + suggestedActionsString);
                     List<State> parts = StringToList.split(suggestedActionsString);
                     suggestedAction.addAll(parts);
                     flags.addAll(tc.traceBack());

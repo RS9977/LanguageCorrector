@@ -12,9 +12,10 @@ public class StringToList {
         if (input == null || input.isEmpty()) {
             throw new IllegalArgumentException("Input string cannot be null or empty");
         }
-        return Arrays.stream(input.split("\\."))
+        return Arrays.stream(input.split("(?<=.)"))//split("\\."))
                      //.map(State::fromString)
                      .map(State::mapToEnum)
                      .collect(Collectors.toList());
     }
+    
 }
