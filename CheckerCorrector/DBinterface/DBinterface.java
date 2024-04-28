@@ -128,6 +128,9 @@ public class DBinterface {
         int flagsCorrectioncnt = 0;
         boolean flagTypoCorrectionAccepted = true;
         StringFileWriter sfw = StringFileWriter.of("correction_details.txt", "\n", isNotGUI);
+
+        //System.out.println(flagsCorrection);
+
         try (Connection connection = DriverManager.getConnection(this.url)) {
 
             // Lookup each token in the database and categorize it
@@ -152,7 +155,7 @@ public class DBinterface {
                                 
                                 initialConf += 5;
                                 if(flagsCorrection.isEmpty()){
-                                    sfw.appendString(token + " (REPLACE WITH) -> "+ tokenCorrected + " | TYPO CORRECTION*");
+                                    sfw.appendString(token + " (REPLACE WITH) -> "+ tokenCorrected + "*");
                                 }else if(!flagsCorrection.get(flagsCorrectioncnt) && isNotGUI){
                                     flagTypoCorrectionAccepted = false;
                                     //tokenList.set(i, "nan");
@@ -162,7 +165,7 @@ public class DBinterface {
                                 }
                                 flagsCorrectioncnt++;
                             }
-                           // ////System.out.print("Corrected token: " + token + " -> " + tokenCorrected);
+                           //System.out.println("Corrected token: " + token + " -> " + tokenCorrected);
 
                             query = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
                             // Replace the token with its role
@@ -172,6 +175,8 @@ public class DBinterface {
                                 role = resultSet.getString("role");
                               //  ////System.out.print("| Second try: "+ token + " -> " + role);
                                 tokens[i] = role;
+                            }else{
+                                tokenList.set(i,tokenCorrected);
                             }
                         }
 
@@ -305,6 +310,7 @@ public class DBinterface {
             StringBuilder result = new StringBuilder();
             boolean flagStart = false;
             int i = 0;
+            //System.out.println(tokenList);
             for (String token : tokenList) {
                 if(i==indDotseen)
                     break;

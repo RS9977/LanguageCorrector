@@ -151,19 +151,30 @@ public class Checker {
                 e.printStackTrace();
             }
         }else if(argPars.isCheckSentence()){
-
-            System.out.println("Sentence: " + argPars.getSentence());
-            jsonMaker.addSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()), dbInterface.checkTokenInDatabase(argPars.getSentence().toLowerCase(), graph));
-            System.out.println("*********************************************************");
-            PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()));
-            List<String> phrases = extractorPhrase.getPhrases();
-            for (String phrase : phrases) {
-                System.out.println("Phrase: " + phrase);
-                jsonMaker.addPhrase(phrase, dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph));
-                System.out.println("------------------------------------------------------------");
+            try {
+                HashTableMaker manager = new HashTableMaker("SQLite/hash_database_english.db");
+                System.out.println("Sentence: " + argPars.getSentence());
+                String sentence = StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase());
+                int ngram        = manager.nGram(sentence, 3);
+                int stateMachine = dbInterface.checkTokenInDatabase(sentence.toLowerCase(), graph);
+                int conf         = (ngram>=0)?(int)(ngram*0.2+stateMachine*0.8):stateMachine;
+                jsonMaker.addSentence(sentence, conf);
+                System.out.println("*********************************************************");
+                PhraseExtractor extractorPhrase = PhraseExtractor.fromSentence(StringProcessor.handleApostrophe(argPars.getSentence().toLowerCase()));
+                List<String> phrases = extractorPhrase.getPhrases();
+                for (String phrase : phrases) {
+                    ngram        = manager.nGram(phrase.toLowerCase(), 3);
+                    stateMachine = dbInterface.checkTokenInDatabase(phrase.toLowerCase(), graph);
+                    conf         = (ngram>=0)?(int)(ngram*0.2+stateMachine*0.8):stateMachine;
+                    System.out.println("Phrase: " + phrase);
+                    jsonMaker.addPhrase(phrase, conf);
+                    System.out.println("------------------------------------------------------------");
+                }
+                jsonMaker.toJson("confidence_ourChecker.json");
+                System.out.println("##########################################################");
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            jsonMaker.toJson("confidence_ourChecker.json");
-            System.out.println("##########################################################");
         }else if(argPars.isCheckGUI()){
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
