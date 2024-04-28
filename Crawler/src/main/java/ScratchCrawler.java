@@ -46,6 +46,10 @@ public class ScratchCrawler {
         // Add whitelisted domains here   
         //"https://www.usenetarchives.com" // Our social media platform for crawling (approved by Prof. Trachtenberg)
     ));
+    public static Set<String> blacklist = new HashSet<String>(Arrays.asList( // Set to store blacklisted domains
+        // Add blacklisted domains here
+        "https://assets.tumblr.com"
+    ));
 
 
     // In order to store the robots.txt restrictions, we are going to use a HashMap with the domain 
@@ -66,7 +70,12 @@ public class ScratchCrawler {
             if (printStats) System.out.println("No more pages to visit."); // Print message
         }
 
-        return nextPage; // Return the next page
+        if(blacklist.contains(extractDomain(nextPage))) { // If the page is blacklisted
+            if (printStats) System.out.println("Page is blacklisted: " + nextPage); // Print message
+            return getNextPage(); // Get the next page
+        } else {
+            return nextPage; // Return the next page
+        }
     }
 
     // https://docs.oracle.com/javase/tutorial/networking/urls/index.html
@@ -169,13 +178,14 @@ public class ScratchCrawler {
                 System.out.println("Length of page processed [Bytes]: " + pageContent.length());
                 System.out.println("Total size of pages visited [Bytes]: " + totalSize);
                 System.out.println("Number of links extracted: " + linksExtracted);
-                System.out.println("Number of pages crawled  (" + MAX_PAGES + " pages max): " + pagesVisited.size());
+                System.out.println("Pages crawled "+ pagesVisited.size() + " (" + MAX_PAGES + " pages max): " );
                 System.out.println("URLs available to crawl: " +  pagesToVisit.size());
                 System.out.println("Processing rate in pages per second: " + processingRatePages);
                 System.out.println("Processing rate in links per second: " + processingRateLinks);
                 System.out.println("Processing rate in bytes per second: " + processingRateSize);
-            }
-           
+            } else {
+                System.out.println("Pages crawled "+ pagesVisited.size() + " (" + MAX_PAGES + " pages max): " );
+            }       
 
             writer.close(); // Close the writer
             reader.close(); // Close the reader
@@ -538,7 +548,12 @@ public class ScratchCrawler {
         try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
             List<String> urls = stream.collect(Collectors.toList()); // Convert the stream to a list
             for (String url : urls) { // Iterate over the list
-                pagesToVisit.add(url);
+                if (url.startsWith("http")) {
+                    pagesToVisit.add(url);
+                } 
+                else {
+                    System.out.println("Invalid URL from file: " + url + "(must include full URL (e.g. https://www.example.com/))");
+                }
             }
         } catch (IOException e) {
             System.out.println("Error reading file: " + filePath);
@@ -569,8 +584,12 @@ public class ScratchCrawler {
                 case "--seed":
                     if (i + 1 < args.length) {
                         seed = args[++i];
-                        crawler.pagesToVisit.add(seed);
-                        startCrawl = true;
+                        if (seed.startsWith("http")) {
+                            crawler.pagesToVisit.add(seed);
+                            startCrawl = true;
+                        } else {
+                            System.out.println("Invalid seed URL: " + seed + "(must include full URL (e.g. https://www.example.com/))");
+                        }
                     } else {
                         System.out.println("Missing seed URL after --seed");
                     }
@@ -621,7 +640,7 @@ public class ScratchCrawler {
                 case "--help":
                     System.out.println("Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]");
                     System.out.println("--file <file_path>: Read URLs from a file and start crawling");
-                    System.out.println("--seed <seed_url>: Start crawling from a seed URL");
+                    System.out.println("--seed <seed_url>: Start crawling from a seed URL (must include full URL (e.g. https://www.example.com/))");
                     System.out.println("--mp <number>: Set the maximum number of pages to crawl");
                     System.out.println("--timeout <seconds>: Set the timeout for each page in seconds");
                     System.out.println("--stats: Print statistics during crawling");

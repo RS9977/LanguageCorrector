@@ -47,11 +47,11 @@ This is provided in the repo, and there is no need to download the library exter
 # Execution
 
 ## Crawler
-To run the webcrawler, run `./crawler` in the /Crawler/ directory. The usage is as follows. Any number of arguments are allowed. 
+To run the webcrawler, run ./crawler [args] in the /Crawler/ directory on a linux system. On Windows, run make in the /Crawler/src/main/java/ folder, then run java ScratchCrawler.java [args]. The usage is as follows. Any number of arguments are allowed. Seed URLS must contain the full URL (e.g. https://www.example.com) **NOTE: Running the crawler without the --xl flag may often times run out of URLs to crawl before the crawling limit of 100 URLs is reached.**
 ```
 Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--help]
     --file <file_path>: Read URLs from a file and start crawling. The file should be placed in the /Crawler/ directory
-    --seed <seed_url>: Start crawling from a seed URL
+    --seed <seed_url>: Start crawling from a seed URL (must include full URL (e.g. https://www.example.com/))
     --mp <number>: Set the maximum number of pages to crawl
     --timeout <seconds>: Set the timeout for each page in seconds
     --stats: Print statistics during crawling
@@ -62,7 +62,11 @@ Usage: java ScratchCrawler [--file <file_path>] or [--seed <seed_url>] or [--hel
     --xl: Increase the storage size per page to 1 MB
     --help: Display this help message
 ```
-
+Some websites to try crawling:
+```
+https://archive.org
+https://en.wikipedia.org (use --xl)
+```
 
 ## Checker/Corrector
 To build the project for CheckerCorrector we are using a make file. Running `make dev_corrector` and `make dev_checker` will compile and build the `checker.jar` and `corrector.jar` with the user interface requested, and and bash script ready to be run them as `./checker --file [PATH]` and `./corrector --file [PATH]`.

@@ -13,3 +13,5 @@ Crawler/target/classes/crawledData.txt
 *.java
 !CheckerCorrector/manifest*
 !CheckerCorrector/**/*.java
+!Crawler/src/main/java/RobotsTXT.java
+!Crawler/src/main/java/Debug.java

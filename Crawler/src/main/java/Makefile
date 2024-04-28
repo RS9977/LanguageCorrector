@@ -16,4 +16,5 @@ RegexParser.class: RegexParser.java
 	$(JAVAC) $(JFLAGS) RegexParser.java
 
 clean:
+	rm -f *.class
 	del *.class
