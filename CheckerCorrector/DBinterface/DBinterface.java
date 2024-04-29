@@ -13,19 +13,27 @@ import DirectedGraph.DirectedGraph;
 
 import java.sql.*;
 import StateMachine.*;
+import TypoCorrector.FilePrefixComparator;
 import TypoCorrector.TypoCorrector;
 import util.TwoListStruct;
 import util.StringFileWriter;
 import util.StringProcessor;
 
 import GUI.SelectCorrectionHandler;
+import SimilarityCorrector.WordPairDatabase;
 
 public class DBinterface {
     String url;
     String dicFileName;
+    WordPairDatabase wordPairDatabase;
     public DBinterface(String url, String dicFileName){
         this.url = "jdbc:sqlite:./"+url;
         this.dicFileName = dicFileName;
+    }
+    public DBinterface(String url, String dicFileName, WordPairDatabase wordPairDatabase){
+        this.url = "jdbc:sqlite:./"+url;
+        this.dicFileName = dicFileName;
+        this.wordPairDatabase = wordPairDatabase;
     }
     public int checkTokenInDatabase(String sentence, DirectedGraph<State> graph){
         StateMachine SM = new StateMachine();
@@ -185,6 +193,7 @@ public class DBinterface {
                     //////System.out.println();
             }
             int     indDotseen = tokenList.size()+1;
+            boolean flagStructureCorrection = true;
             if(flagTypoCorrectionAccepted){
                 List<State> actions = new ArrayList<>();
 
@@ -294,7 +303,41 @@ public class DBinterface {
                             }
                         }
                     }
-                }   
+                }
+                if(flagStructureCorrection){
+
+                    for(int i=0; i<tokenList.size()-1; i++){
+                        String nextToken = tokenList.get(i+1);
+                        try (Statement statement = connection.createStatement()) {
+                            String query = "SELECT role FROM word_roles WHERE word = '" + nextToken + "';";
+                            ResultSet resultSet = statement.executeQuery(query);
+                            if (resultSet.next()) {
+                                String roleNext = resultSet.getString("role");
+                                if(roleNext.equals("verb")){// || roleNext.equals("noun") || roleNext.equals("adjective") || roleNext.equals("adverb")){                 
+                                    wordPairDatabase.bfsAndGetWords(tokenList.get(i), 2);
+                                    FilePrefixComparator findSimilarity =  FilePrefixComparator.of("similarity_words.txt");
+                                    String tokenCorrected = findSimilarity.findBestMatchingPrefix(nextToken);
+                                    if(!nextToken.equals(tokenCorrected)){
+                                        String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                                        ResultSet resultSetNext = statement.executeQuery(queryNext);
+                                        if(resultSetNext.next()){    
+                                            String roleNextNext = resultSet.getString("role");
+                                            if(roleNextNext.equals("verb")){
+                                                if(flagsCorrection.isEmpty()){
+                                                    sfw.appendString(nextToken + " (REPLACE WITH) -> "+ tokenCorrected);
+                                                    tokenList.set(i+1, tokenCorrected);
+                                                }else if(flagsCorrection.get(flagsCorrectioncnt)){
+                                                    tokenList.set(i+1, tokenCorrected);
+                                                }
+                                                flagsCorrectioncnt++;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             try {

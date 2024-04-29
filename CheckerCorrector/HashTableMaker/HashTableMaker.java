@@ -18,7 +18,7 @@ public class HashTableMaker {
 
     private void createTableIfNotExists() throws SQLException {
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS hashes (hash TEXT PRIMARY KEY, count INTEGER)");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS hashes (hash TEXT PRIMARY KEY, count INTEGER, phrase TEXT)");
         }
     }
 
@@ -53,9 +53,10 @@ public class HashTableMaker {
             updateStatement.setString(2, hash);
             updateStatement.executeUpdate();
         } else {
-            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO hashes (hash, count) VALUES (?, ?)");
+            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO hashes (hash, count, phrase) VALUES (?, ?, ?)");
             insertStatement.setString(1, hash);
             insertStatement.setInt(2, 1);
+            insertStatement.setString(3, phrase);
             insertStatement.executeUpdate();
         }
     }

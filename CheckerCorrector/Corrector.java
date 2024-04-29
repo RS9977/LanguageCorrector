@@ -15,6 +15,7 @@ import util.StringFileWriter;
 import util.StringProcessor;
 import Translator.*;
 import StateMachine.*;
+import SimilarityCorrector.WordPairDatabase;
 
 
 public class Corrector implements GUIListener {
@@ -27,11 +28,13 @@ public class Corrector implements GUIListener {
     private DirectedGraph<State> graphGUI;
     private int senteceIndGUI;
     public void start() {
-        
+        WordPairDatabase wordPairDatabaseGUI;
         if(!this.argParsGUI.isDutch()){
-            this.dbInterfaceGUI = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt");
+            wordPairDatabaseGUI = WordPairDatabase.of("SQLite/word_similarity_english.db");
+            this.dbInterfaceGUI = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt", wordPairDatabaseGUI);
         }else{
-            this.dbInterfaceGUI = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt");
+            wordPairDatabaseGUI = WordPairDatabase.of("SQLite/word_similarity_dutch.db");
+            this.dbInterfaceGUI = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt", wordPairDatabaseGUI);
         }
         this.graphGUI = new BasicGraph().getGraph();
         this.stringWriterGUI = StringFileWriter.of("corrected.txt");
@@ -98,17 +101,25 @@ public class Corrector implements GUIListener {
         ArgumentParser argPars = ArgumentParser.of(args);
         BasicGraph basicGraphClass = new BasicGraph();
         DBinterface dbInterface;
+        WordPairDatabase wordPairDatabase;
         if(!argPars.isDutch()){
-            dbInterface = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt");
+            wordPairDatabase = WordPairDatabase.of("SQLite/word_similarity_english.db");
+            dbInterface = new DBinterface("SQLite/token_database_english.db", "SQLite/smallDic.txt", wordPairDatabase);
+            
         }else{
-            dbInterface = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt");
+            wordPairDatabase = WordPairDatabase.of("SQLite/word_similarity_dutch.db");
+            dbInterface = new DBinterface("SQLite/token_database_dutch.db", "SQLite/DutchTranslation.txt", wordPairDatabase);   
         }
         DirectedGraph graph = basicGraphClass.getGraph();
         StringFileWriter stringWriter = StringFileWriter.of("corrected.txt");
         StringFileWriter.deleteFile("correction_details.txt");
             
-        
-        if(argPars.isTranslateToDutch()){
+        if(argPars.isUpdateWordSimilarity()){
+            if(argPars.isCheckFile()){
+                wordPairDatabase.createTable();
+                wordPairDatabase.processSentences(argPars.getFileName());
+            }
+        }else if(argPars.isTranslateToDutch()){
             DirectTranslatorEnglishToDutch directTranslator = DirectTranslatorEnglishToDutch.make();
             directTranslator.loadWordMapFromFile("SQLite/DutchTranslation.txt");
             if(argPars.isCheckFile()){

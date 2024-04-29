@@ -17,6 +17,7 @@ public class ArgumentParser {
     private boolean validateUpdates;
     private boolean translateToDutch;
     private boolean translateToEnglish;
+    private boolean updateWordSimilarity;
     private boolean dutch;
 
     ArgumentParser(String[] args) {
@@ -31,6 +32,7 @@ public class ArgumentParser {
         translateToDutch = false;
         translateToEnglish = false;
         dutch = false;
+        updateWordSimilarity = false;
         parseArguments(Arrays.asList(args));
     }
 
@@ -91,6 +93,9 @@ public class ArgumentParser {
                     case "--updateTokenFromDic":
                         updateTokenFromDic = true;
                         break;
+                    case "--updateWordSimilarity":
+                        updateWordSimilarity =true;
+                    break;
                     // Add cases for other arguments here
                     default:
                         System.out.println("Invalis options. Please use --help to see how to use the tool.");
@@ -114,6 +119,7 @@ public class ArgumentParser {
         System.out.println("        --translateToDutch: this option should be used if you want to translate from English to Dutch. Specify the the filename in txt format or sentence option for this method.");
         System.out.println("        --translateToEnglish: this option should be used if you want to translate from Dutch to English. Specify the the filename in txt format or sentence option for this method.");
         System.out.println("        --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.");
+        System.out.println("        --updateWordSimilarity: this option will update the database for similarity. A text file should be passed as well which is the crawled data. The default is English.");
         System.out.println("    Checker Options:");
         System.out.println("        --file <filename>: this option should be used if you want to pass your input as file.");
         System.out.println("        --sentence <sentence>: this option should be used if you want to pass your input as a small sentence.");
@@ -167,5 +173,8 @@ public class ArgumentParser {
     }
     public boolean isUpdateTokenFromDic(){
         return updateTokenFromDic;
+    }
+    public boolean isUpdateWordSimilarity(){
+        return updateWordSimilarity;
     }
 }

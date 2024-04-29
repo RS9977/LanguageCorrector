@@ -87,6 +87,7 @@ Michael Harkess
 - Both corrector and checker are limited by how large the crawled data was and how much the user fix them.
 - The corrector is unable to fix the relation of groups of word more than 2 because it's not using the n-grams.
 - The way Apostrophe s is handled is to expand the clause, e.g. "it's -> it is" and "John's car -> car of John"
+- If for any reason the database left in-use by a process and you kept getting the error that an specific `databse is locked`, run `fuser databaseName.db` and kill all the process that are active, using `kill -9 <process_number>`
 
 #### Android App
 - If a dialog box pops up and the device/screen is rotated, then the app will unexpectedly crash
