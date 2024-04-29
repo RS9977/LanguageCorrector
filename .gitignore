@@ -12,6 +12,8 @@ Crawler/target/classes/crawledData.txt
 *.db
 *.java
 *.class
+*.txt
+!CheckerCorrector/SQLite/*
 !CheckerCorrector/manifest*
 !CheckerCorrector/**/*.java
 !Crawler/src/main/java/RobotsTXT.java

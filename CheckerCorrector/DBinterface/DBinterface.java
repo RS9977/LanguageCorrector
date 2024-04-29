@@ -163,7 +163,7 @@ public class DBinterface {
                                 
                                 initialConf += 5;
                                 if(flagsCorrection.isEmpty()){
-                                    sfw.appendString(token + " (REPLACE WITH) -> "+ tokenCorrected + "*");
+                                    sfw.appendString(token + " (REPLACE WITH) -> "+ tokenCorrected + "**");
                                 }else if(!flagsCorrection.get(flagsCorrectioncnt) && isNotGUI){
                                     flagTypoCorrectionAccepted = false;
                                     //tokenList.set(i, "nan");
@@ -236,23 +236,48 @@ public class DBinterface {
                             if (resultSet.next()) {
                                 word = resultSet.getString("word");
                                 ////System.out.println("Here I am: "+ word);
+                                if(i+biasToken-1>0){
+                                    String nextToken = word;
+                                    String queryy = "SELECT role FROM word_roles WHERE word = '" + nextToken + "';";
+                                    ResultSet resultSett = statement.executeQuery(queryy);
+                                    if (resultSett.next()) {
+                                        String roleNext = resultSett.getString("role");
+                                        wordPairDatabase.bfsAndGetWords(tokenList.get(i+biasToken-1), 2);
+                                        FilePrefixComparator findSimilarity =  FilePrefixComparator.of("similarity_words.txt");
+                                        String tokenCorrected = findSimilarity.findBestMatchingPrefix(nextToken);
+                                        if(!nextToken.equals(tokenCorrected)){
+                                            String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                                            ResultSet resultSetNext = statement.executeQuery(queryNext);
+                                            if(resultSetNext.next()){    
+                                                String roleNextNext = resultSett.getString("role");
+                                                if(roleNextNext.equals(roleNext)){
+                                                    word = tokenCorrected;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 if(i+biasToken<tokenList.size()){
                                     
                                     if(flagsCorrection.isEmpty()){
-                                        sfw.appendString(tokenList.get(i) + " (REPLACE WITH) -> "+ word);
+                                        sfw.appendString(tokenList.get(i) + " (REPLACE WITH) -> "+ word + "*");
                                         tokenList.set(i+biasToken,word);
                                     }else if(flagsCorrection.get(flagsCorrectioncnt)){
                                         
                                         tokenList.set(i+biasToken,word);
+                                    }else{
+                                        flagStructureCorrection = false;
                                     }
                                     
                                     
                                 }else{
                                     if(flagsCorrection.isEmpty()){
-                                        sfw.appendString("(INSERTION INTO INDEX): "+ i + " -> "+ word);
+                                        sfw.appendString("(INSERTION INTO INDEX): "+ i + " -> "+ word + "*");
                                         tokenList.add(word);
                                     }else if(flagsCorrection.get(flagsCorrectioncnt)){
                                         tokenList.add(word);
+                                    }else{
+                                        flagStructureCorrection = false;
                                     }
                                 }
                                 flagsCorrectioncnt++;
@@ -262,12 +287,13 @@ public class DBinterface {
                     }else if(flags.get(i+delCnt)==2){
                         delCnt++;
                         if(flagsCorrection.isEmpty()){
-                            sfw.appendString(tokenList.get(i) + "-> (REMOVE)");
+                            sfw.appendString(tokenList.get(i) + "-> (REMOVE)" + "*");
                             tokenList.remove(i+biasToken);
                         }else if(flagsCorrection.get(flagsCorrectioncnt)){
                             tokenList.remove(i+biasToken);
                         }else{
                             biasToken++;
+                            flagStructureCorrection = false;
                         }
                         flagsCorrectioncnt++;
                     // System.out.println(biasToken);
@@ -280,9 +306,29 @@ public class DBinterface {
                             if (resultSet.next()) {
                                 word = resultSet.getString("word");
                                 ////System.out.println("Here I am: "+ word);
-                                
+                                if(i+biasToken-1>0){
+                                    String nextToken = word;
+                                    String queryy = "SELECT role FROM word_roles WHERE word = '" + nextToken + "';";
+                                    ResultSet resultSett = statement.executeQuery(queryy);
+                                    if (resultSett.next()) {
+                                        String roleNext = resultSett.getString("role");
+                                        wordPairDatabase.bfsAndGetWords(tokenList.get(i+biasToken-1), 2);
+                                        FilePrefixComparator findSimilarity =  FilePrefixComparator.of("similarity_words.txt");
+                                        String tokenCorrected = findSimilarity.findBestMatchingPrefix(nextToken);
+                                        if(!nextToken.equals(tokenCorrected)){
+                                            String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                                            ResultSet resultSetNext = statement.executeQuery(queryNext);
+                                            if(resultSetNext.next()){    
+                                                String roleNextNext = resultSett.getString("role");
+                                                if(roleNextNext.equals(roleNext)){
+                                                    word = tokenCorrected;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 if(flagsCorrection.isEmpty()){
-                                    sfw.appendString("(INSERTION INTO THE END) -> "+ word);
+                                    sfw.appendString("(INSERTION INTO THE END) -> "+ word + "*");
                                     if(i<tokenList.size()){
                                         tokenList.add(i+biasToken,word);
                                     }else{
@@ -296,6 +342,7 @@ public class DBinterface {
                                         tokenList.add(word);
                                     }
                                 }else{
+                                    flagStructureCorrection = false;
                                     biasToken--;
                                 }
                                 flagsCorrectioncnt++;

@@ -16,3 +16,5 @@
 - Fix bugs resulted in case of using a special charachter for both checker and corrector.
 - Increase the speed of corrector's GUI and fix reported bug for running out of heap memory.
 - Fix corrector bugs of not updating the typos in the final correction.
+- Increase accuracy of checker by adding the n-grams in everywhere, previously for some methods it was missed such as in the GUI.
+- Increase accuracy of corrector by introducing new method on top of the previous mehtods.
