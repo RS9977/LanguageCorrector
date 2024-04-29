@@ -19,7 +19,7 @@ public class SelectCorrectionGUI extends JFrame {
     private JLabel noteLabel;
     private JLabel emptyLabel;
     private GUIListener listener;
-    private static final int POPUP_WIDTH = 1000;
+    private static final int POPUP_WIDTH = 1200;
     private static final int POPUP_HEIGHT = 300;
     
 
@@ -124,7 +124,7 @@ public class SelectCorrectionGUI extends JFrame {
     private void updateCounter(String label){
         emptyLabel = new JLabel(" ");
         emptyLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        noteLabel = new JLabel("Rejection of suggestions with * may result in a new set of suggestions regardless of other choices.");
+        noteLabel = new JLabel("Suggestions with ** have the highest priority and then *. Rejection of a suggestion with higher priority neutralize suggestions with lower priority.");
         noteLabel.setHorizontalAlignment(SwingConstants.CENTER);
         counterLabel = new JLabel(label);
         counterLabel.setHorizontalAlignment(SwingConstants.CENTER);
