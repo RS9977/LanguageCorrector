@@ -124,7 +124,7 @@ public class SelectCorrectionGUI extends JFrame {
     private void updateCounter(String label){
         emptyLabel = new JLabel(" ");
         emptyLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        noteLabel = new JLabel("Rejection of suggestion with * will result in a new set of suggestions regardless of other choices.");
+        noteLabel = new JLabel("Rejection of suggestions with * may result in a new set of suggestions regardless of other choices.");
         noteLabel.setHorizontalAlignment(SwingConstants.CENTER);
         counterLabel = new JLabel(label);
         counterLabel.setHorizontalAlignment(SwingConstants.CENTER);

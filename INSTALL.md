@@ -36,6 +36,8 @@ This is provided in the repo, and there is no need to download the library exter
         `./corrector --correctorGUI --file filename.txt` -> This will run a GUI where you can see what are the suggestions and choose between them. The file is where it is looking for the text to be corrected.
         `./corrector --correctorGUI --dutch --file filename.txt` -> This will do the same thing as the previous one, but with Dutch. Specifying dutch for the previous ones will also lead to usage of dutch. The file is where it is looking for the text to be corrected.
         `./corrector --translateToDutch --file "filename.txt"` -> This will translate the english text in the file to dutch and put it in `corrected.txt`
+        `./corrector --updateWordSimilarity --file "filename.txt"` -> This option will update the database for similarity using the specified file.
+        
 
     Checker:
         `./checker --file "filename.txt"` -> This will dump the confidence score for English of the specidied file to `confidence_ourChecker.json`
@@ -85,6 +87,7 @@ Usage:
         --translateToDutch: this option should be used if you want to translate from English to Dutch. Specify the the filename in txt format or sentence option for this method.
         --translateToEnglish: this option should be used if you want to translate from Dutch to English. Specify the the filename in txt format or sentence option for this method.
         --dutch: this option should be used if you want to use dutch language alongside other options. The default is English.
+        --updateWordSimilarity: this option will update the database for similarity. A text file should be passed as well which is the crawled data. The default is English.
     Checker Options:
         --file <filename>: this option should be used if you want to pass your input as file.
         -sentence <sentence>: this option should be used if you want to pass your input as a small sentence.
