@@ -41,6 +41,7 @@ public class WordPairDatabase {
                 while ((line = reader.readLine()) != null) {
                     line = line.toLowerCase();
                     line = StringProcessor.handleApostrophe(line);
+                    line = line.replaceAll("\\p{Punct}", " $0");
                     String[] words = line.split("\\s+");
                     for (int i = 0; i < words.length - 1; i++) {
                         String word1 = words[i];
@@ -131,6 +132,58 @@ public class WordPairDatabase {
         }
 
         return nextWords;
+    }
+
+    public void bfsAndWriteCountsToFile(String startWord, int depth) {
+        String outputFile = "similarity_words.txt";
+        Map<String, Integer> wordCounts = new HashMap<>();
+        Queue<String> queue = new ArrayDeque<>();
+        queue.add(startWord);
+
+        try (Connection conn = DriverManager.getConnection(url)) {
+            while (!queue.isEmpty() && depth > 0) {
+                int size = queue.size();
+                for (int i = 0; i < size; i++) {
+                    String word = queue.poll();
+                    for (Map.Entry<String, Integer> entry : getCountsForWord(conn, word).entrySet()) {
+                        //String pair = word + " " + entry.getKey();
+                        wordCounts.put(entry.getKey(), entry.getValue());
+                        queue.add(entry.getKey());  // Add next word to queue for BFS
+                    }
+                }
+                depth--;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error accessing database: " + e.getMessage());
+        }
+
+        // Write word counts to the output file
+        //System.out.print("WORDCOUNTS: ");
+        //System.out.println(wordCounts);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            for (Map.Entry<String, Integer> entry : wordCounts.entrySet()) {
+                writer.write(entry.getKey() + " " + entry.getValue() + "\n");
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private Map<String, Integer> getCountsForWord(Connection conn, String word) {
+        Map<String, Integer> counts = new HashMap<>();
+        String sql = "SELECT word2, count FROM word_pairs WHERE word1 = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, word);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                counts.put(rs.getString("word2"), rs.getInt("count"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving counts for word: " + e.getMessage());
+        }
+
+        return counts;
     }
 
     public static void main(String[] args) {

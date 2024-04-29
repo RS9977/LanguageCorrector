@@ -15,6 +15,7 @@ import java.sql.*;
 import StateMachine.*;
 import TypoCorrector.FilePrefixComparator;
 import TypoCorrector.TypoCorrector;
+import TypoCorrector.WordCountSorter;
 import util.TwoListStruct;
 import util.StringFileWriter;
 import util.StringProcessor;
@@ -236,22 +237,26 @@ public class DBinterface {
                             if (resultSet.next()) {
                                 word = resultSet.getString("word");
                                 ////System.out.println("Here I am: "+ word);
-                                if(i+biasToken-1>0){
+                                if(i+biasToken>0){
                                     String nextToken = word;
                                     String queryy = "SELECT role FROM word_roles WHERE word = '" + nextToken + "';";
                                     ResultSet resultSett = statement.executeQuery(queryy);
                                     if (resultSett.next()) {
                                         String roleNext = resultSett.getString("role");
-                                        wordPairDatabase.bfsAndGetWords(tokenList.get(i+biasToken-1), 2);
-                                        FilePrefixComparator findSimilarity =  FilePrefixComparator.of("similarity_words.txt");
-                                        String tokenCorrected = findSimilarity.findBestMatchingPrefix(nextToken);
-                                        if(!nextToken.equals(tokenCorrected)){
-                                            String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
-                                            ResultSet resultSetNext = statement.executeQuery(queryNext);
-                                            if(resultSetNext.next()){    
-                                                String roleNextNext = resultSett.getString("role");
-                                                if(roleNextNext.equals(roleNext)){
-                                                    word = tokenCorrected;
+                                        wordPairDatabase.bfsAndWriteCountsToFile(tokenList.get(i+biasToken-1), 2);
+                                        WordCountSorter wordCountSorter = WordCountSorter.of("similarity_words.txt");
+                                        List<String> possibleWords = wordCountSorter.getSortedWordsByCount();
+                                        //System.out.println(possibleWords);
+                                        for(String tokenCorrected: possibleWords){
+                                            if(!nextToken.equals(tokenCorrected)){
+                                                String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                                                ResultSet resultSetNext = statement.executeQuery(queryNext);
+                                                if(resultSetNext.next()){    
+                                                    String roleNextNext = resultSett.getString("role");
+                                                    if(roleNextNext.equals(roleNext)){
+                                                        word = tokenCorrected;
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
@@ -272,7 +277,7 @@ public class DBinterface {
                                     
                                 }else{
                                     if(flagsCorrection.isEmpty()){
-                                        sfw.appendString("(INSERTION INTO INDEX): "+ i + " -> "+ word + "*");
+                                        sfw.appendString("(INSERTION INTO THE END) -> "+ word + "*");
                                         tokenList.add(word);
                                     }else if(flagsCorrection.get(flagsCorrectioncnt)){
                                         tokenList.add(word);
@@ -306,32 +311,38 @@ public class DBinterface {
                             if (resultSet.next()) {
                                 word = resultSet.getString("word");
                                 ////System.out.println("Here I am: "+ word);
-                                if(i+biasToken-1>0){
+                                if(i+biasToken>0){
                                     String nextToken = word;
                                     String queryy = "SELECT role FROM word_roles WHERE word = '" + nextToken + "';";
                                     ResultSet resultSett = statement.executeQuery(queryy);
                                     if (resultSett.next()) {
                                         String roleNext = resultSett.getString("role");
-                                        wordPairDatabase.bfsAndGetWords(tokenList.get(i+biasToken-1), 2);
-                                        FilePrefixComparator findSimilarity =  FilePrefixComparator.of("similarity_words.txt");
-                                        String tokenCorrected = findSimilarity.findBestMatchingPrefix(nextToken);
-                                        if(!nextToken.equals(tokenCorrected)){
-                                            String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
-                                            ResultSet resultSetNext = statement.executeQuery(queryNext);
-                                            if(resultSetNext.next()){    
-                                                String roleNextNext = resultSett.getString("role");
-                                                if(roleNextNext.equals(roleNext)){
-                                                    word = tokenCorrected;
+                                        wordPairDatabase.bfsAndWriteCountsToFile(tokenList.get(i+biasToken-1), 2);
+                                        WordCountSorter wordCountSorter = WordCountSorter.of("similarity_words.txt");
+                                        List<String> possibleWords = wordCountSorter.getSortedWordsByCount();
+                                       // System.out.println(possibleWords);
+                                        for(String tokenCorrected: possibleWords){
+                                            if(!nextToken.equals(tokenCorrected)){
+                                                String queryNext = "SELECT role FROM word_roles WHERE word = '" + tokenCorrected + "';";
+                                                ResultSet resultSetNext = statement.executeQuery(queryNext);
+                                                if(resultSetNext.next()){    
+                                                    String roleNextNext = resultSett.getString("role");
+                                                    if(roleNextNext.equals(roleNext)){
+                                                        word = tokenCorrected;
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
                                 if(flagsCorrection.isEmpty()){
-                                    sfw.appendString("(INSERTION INTO THE END) -> "+ word + "*");
+                                    
                                     if(i<tokenList.size()){
+                                        sfw.appendString("(INSERTION INTO INDEX): "+ i + " -> "+ word + "*");
                                         tokenList.add(i+biasToken,word);
                                     }else{
+                                        sfw.appendString("(INSERTION INTO THE END) -> "+ word + "*");
                                         tokenList.add(word);
                                     }
                                 }else if(flagsCorrection.get(flagsCorrectioncnt)){
@@ -339,6 +350,7 @@ public class DBinterface {
                                     // System.out.println("here!");
                                         tokenList.add(i+biasToken,word);
                                     }else{
+                                        //sfw.appendString("(INSERTION INTO THE END) -> "+ word + "*");
                                         tokenList.add(word);
                                     }
                                 }else{
